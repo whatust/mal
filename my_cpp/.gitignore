@@ -1,0 +1,3 @@
+*.o
+*.a
+step*_repl
