@@ -1,18 +1,26 @@
 #include"ReadLine.h"
-#include<experimental/filesystem>
+#include<filesystem>
 #include<readline/readline.h>
 #include<readline/history.h>
 #include<readline/tilde.h>
+#include<iostream>
 
-//namespace fs = std::filesystem;
+using std::cout;
+using std::endl;
+
+namespace fs = std::filesystem;
 
 ReadLine::ReadLine(const string& cache_folder)
-: hist_path(tilde_expand(cache_folder.c_str())) {
-        //fs::create_directory(cache_folder);
+: hist_path(tilde_expand((cache_folder+"history").c_str())) {
+        fs::create_directory(tilde_expand(cache_folder.c_str()));
         read_history(hist_path.c_str());
+        write_history(hist_path.c_str());
+        stifle_history(10);
 }
 
-ReadLine::~ReadLine() {}
+ReadLine::~ReadLine() {
+        write_history(hist_path.c_str());
+}
 
 bool ReadLine::read(const string& prompt, string& input) {
 
@@ -20,7 +28,7 @@ bool ReadLine::read(const string& prompt, string& input) {
         if(line == nullptr)
                 return false;
         add_history(line);
-        append_history(1, hist_path.c_str());
+
         input = line;
         return true;
 }
