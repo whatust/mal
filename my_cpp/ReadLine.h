@@ -1,4 +1,6 @@
-#pragma once
+#ifndef READLINE_H_
+#define READLINE_H_
+
 #include<string>
 
 using std::string;
@@ -13,3 +15,4 @@ class ReadLine {
                 string hist_path;
 };
 
+#endif  // REDLINE_H_
