@@ -19,9 +19,9 @@ int main(int argc, char* argv[]) {
         string prompt = "> ";
         string input;
 
-        while(readLine.read(prompt, input)) {
-                cout << rep(input) << '\n';
-        }
+//        while(readLine.read(prompt, input)) {
+//                cout << rep(input) << '\n';
+//        }
         return 0;
 }
 

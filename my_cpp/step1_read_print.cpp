@@ -23,7 +23,13 @@ int main(int argc, char* argv[]) {
         string input;
 
         while(readLine.read(prompt, input)) {
-                cout << rep(input) << '\n';
+
+            string ret = rep(input);
+            cout << ret;
+
+            if(ret != "")
+                cout << endl;
+
         }
         return 0;
 }

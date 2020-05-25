@@ -88,7 +88,15 @@ vector<string> tokenize(const string& input) {
 shared_ptr<MalToken> read_str(const string &input) {
 
     Reader reader(tokenize(input));
-    shared_ptr<MalToken> ast(read_form(reader));
+    MalTokenPtr ret;
+
+    if(!reader.empty())
+        ret = read_form(reader);
+    else
+        ret = nullptr;
+
+    shared_ptr<MalToken> ast(ret);
+
     return ast;
 }
 
@@ -127,4 +135,8 @@ void Reader::print_tokens() const {
     for(auto token : tokens)
         cout << token << endl;
     return;
+}
+
+bool Reader::empty() const {
+    return tokens.empty();
 }

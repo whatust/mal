@@ -19,6 +19,7 @@ class Reader {
         Reader(vector<string>&& tokens);
         ~Reader();
         void print_tokens() const;
+        bool empty() const;
 
     private:
         vector<string> tokens;
