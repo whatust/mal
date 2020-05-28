@@ -6,7 +6,7 @@ static const std::regex WHITESPACES_REGEX("[\\s,]+");
 static const std::regex TOKEN_REGEX[] = {
     std::regex("~@"),                        // Special two characters
     std::regex("[\\[\\]{}()'`~^@]"),         // Special single characters
-    std::regex("\"(?:\\\\.|[^\\\\\"])*\"?"), // Balanced and umbalanced strings
+    std::regex("\"(?:\\\\.|[^\\\\\"])*\""),  // Balanced and umbalanced strings
     std::regex("[^\\s\\[\\]{}('\"`,;)]+"),   // Symbols numbers constants
     std::regex(";.*")                        // Comments
 };
@@ -73,9 +73,8 @@ StringVector tokenize(const std::string& input) {
             match_found = true;
         }
 
-        // Check for invalid expressions
-        std::string got_str(iter, std::end(input));
-        check_valid_expression(!match_found, "Erro: Invalid expression %s", got_str);
+        // Check 
+        check_list_balance(!match_found, "Error: Expected '%c', got %s", '"', "EOF");
     }
     return tokens;
 }
@@ -114,10 +113,10 @@ MalTokenPtr read_form(Reader& reader) {
             reader.next();
             ast = read_list(reader, '}');
             break;
-        case '"':
+        /*case '"':
             check_list_balance(reader.peek().back() != '"' || \
                     reader.peek().size() == 1,
-                    "Error: Expected '%c', got %s", '"', "EOF");
+                    "Error: Expected '%c', got %s", '"', "EOF");*/
         default:
             ast = read_atom(reader);
     }
