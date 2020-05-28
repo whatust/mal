@@ -1,5 +1,6 @@
 *.o
 *.a
 step*_repl
+run
 .deps
 
