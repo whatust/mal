@@ -5,48 +5,53 @@
 #include"Reader.h"
 #include"Types.h"
 #include"Printer.h"
+#include"Validation.h"
 
-using std::cout;
-using std::endl;
-using std::string;
-
-string rep(const string& input);
-shared_ptr<MalToken> READ(const string& input);
-shared_ptr<MalToken> EVAL(shared_ptr<MalToken> ast);
-string PRINT(shared_ptr<MalToken> ast);
+std::string rep(const std::string& input);
+std::shared_ptr<MalToken> READ(const std::string& input);
+std::shared_ptr<MalToken> EVAL(std::shared_ptr<MalToken> ast);
+std::string PRINT(std::shared_ptr<MalToken> ast);
 
 static ReadLine readLine("~/.cache/mymal/");
 
 int main(int argc, char* argv[]) {
 
-        string prompt = "> ";
-        string input;
+    std::string prompt = "user> ";
+    std::string input;
 
         while(readLine.read(prompt, input)) {
 
-            string ret = rep(input);
-            cout << ret;
+            std::string out;
 
-            if(ret != "")
-                cout << endl;
-
+            try {
+                out = rep(input);
+            }
+            catch(EmptyInput&) {
+                continue;
+            }
+            catch(std::string& error) {
+                std::cerr << error << std::endl;
+                continue;
+            }
+            std::cout << out << std::endl;
         }
         return 0;
 }
 
-string rep(const string& input) {
+std::string rep(const std::string& input) {
         return PRINT(EVAL(READ(input)));
 }
 
-shared_ptr<MalToken> READ(const string& input) {
+std::shared_ptr<MalToken> READ(const std::string& input) {
     return read_str(input);
 }
 
-shared_ptr<MalToken> EVAL(shared_ptr<MalToken> ast) {
+std::shared_ptr<MalToken> EVAL(std::shared_ptr<MalToken> ast) {
     return ast;
 }
 
-string PRINT(shared_ptr<MalToken> ast) {
+std::string PRINT(std::shared_ptr<MalToken> ast) {
     return pr_str(ast);
 }
+
 

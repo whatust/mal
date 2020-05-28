@@ -5,39 +5,39 @@
 #include<vector>
 #include<memory>
 
-using std::string;
-using std::vector;
-using std::shared_ptr;
 using std::static_pointer_cast;
 
-typedef vector<string> StringVector;
+typedef std::vector<std::string> StringVector;
+class EmptyInput : public std::exception {};
 
 enum tokenType { SYMBOL, NUMBER, LIST };
 
 class MalToken {
 
     public:
-    tokenType type;
-    MalToken(tokenType _type);
+        tokenType type;
+        MalToken(tokenType _type);
 };
 
 class MalTokenSymbol : public MalToken {
 
     public:
-    string name;
-    MalTokenSymbol(string& _name);
+        std::string name;
+        MalTokenSymbol(std::string& _name);
 };
 
 class MalTokenNumber : public MalToken {
     public:
-    int value;
-    MalTokenNumber(const string& _number);
+        int value;
+        MalTokenNumber(const std::string& _number);
 };
 
 class MalTokenList : public MalToken {
     public:
-    vector<shared_ptr<MalToken>> list;
-    MalTokenList();
+        char close_char;
+        char open_char;
+        std::vector<std::shared_ptr<MalToken>> list;
+        MalTokenList(const char _end_char);
 };
 
 typedef MalToken* MalTokenPtr;

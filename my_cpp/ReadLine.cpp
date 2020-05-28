@@ -5,12 +5,9 @@
 #include<readline/tilde.h>
 #include<iostream>
 
-using std::cout;
-using std::endl;
-
 namespace fs = std::filesystem;
 
-ReadLine::ReadLine(const string& cache_folder)
+ReadLine::ReadLine(const std::string& cache_folder)
 : hist_path(tilde_expand((cache_folder+"history").c_str())) {
         fs::create_directory(tilde_expand(cache_folder.c_str()));
         read_history(hist_path.c_str());
@@ -22,7 +19,7 @@ ReadLine::~ReadLine() {
         write_history(hist_path.c_str());
 }
 
-bool ReadLine::read(const string& prompt, string& input) {
+bool ReadLine::read(const std::string& prompt, std::string& input) {
 
         char * line = readline(prompt.c_str());
         if(line == nullptr)

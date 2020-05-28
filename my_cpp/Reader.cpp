@@ -1,46 +1,33 @@
-#include<assert.h>
-
 #include"Reader.h"
 
-using std::regex;
-using std::smatch;
 using std::regex_constants::match_continuous;
-using std::begin;
-using std::end;
-using std::cout;
-using std::cerr;
-using std::endl;
 
-static const regex WHITESPACES_REGEX("[\\s,]*");
-static const regex TOKEN_REGEX[] = {
-    regex("~@"),
-    regex("[\\[\\]{}()'`~^@]"),
-    regex("\"(?:\\\\.|[^\\\\\"])*\""),
-    regex("[^\\s\\[\\]{}('\"`,;)]+")};
+static const std::regex WHITESPACES_REGEX("[\\s,]+");
+static const std::regex TOKEN_REGEX[] = {
+    std::regex("~@"),                        // Special two characters
+    std::regex("[\\[\\]{}()'`~^@]"),         // Special single characters
+    std::regex("\"(?:\\\\.|[^\\\\\"])*\"?"), // Balanced and umbalanced strings
+    std::regex("[^\\s\\[\\]{}('\"`,;)]+"),   // Symbols numbers constants
+    std::regex(";.*")                        // Comments
+};
 
-Reader::Reader(vector<string>&& _tokens)
+Reader::Reader(StringVector&& _tokens)
     : tokens(move(_tokens)),
-    s_iter(begin(tokens)),
-    s_end(end(tokens)){}
+    s_iter(std::begin(tokens)),
+    s_end(std::end(tokens)){}
 
 Reader::~Reader(){}
 
-string Reader::peek() {
-    assert(!is_eof());
+std::string Reader::peek() {
     return *s_iter;
 }
 
-string Reader::next() {
+std::string Reader::next() {
 
-    assert(!is_eof());
-    string token = peek();
+    std::string token = peek();
     next_token();
 
     return token;
-}
-
-bool Reader::is_eof() const {
-    return s_iter == s_end;
 }
 
 void Reader::next_token() {
@@ -48,29 +35,36 @@ void Reader::next_token() {
     return;
 }
 
-vector<string> tokenize(const string& input) {
+bool Reader::is_eof() const{
+    return s_iter == s_end;
+}
 
-    vector<string> tokens;
+StringVector tokenize(const std::string& input) {
 
-    for(auto iter = begin(input); iter != end(input);) {
+    StringVector tokens;
 
-        smatch match;
+    for(auto iter = std::begin(input); iter != std::end(input);) {
+
+        std::smatch match;
         auto flag = match_continuous;
 
-        if(regex_search(iter, end(input), match, WHITESPACES_REGEX, flag)) {
-
+        // Remove whitespaces
+        if(std::regex_search(iter, std::end(input), match, WHITESPACES_REGEX, flag)) {
             if(match.position(0) == 0 && match.length(0) > 0) {
                 iter += match.length(0);
             }
         }
 
+        if(iter == std::end(input)) // Check end of line with whitespaces
+            continue;
+
         bool match_found = false;
         for(auto &regex : TOKEN_REGEX) {
 
-            smatch match;
+            std::smatch match;
             auto flag = match_continuous;
 
-            if(!regex_search(iter, end(input), match, regex, flag)) continue;
+            if(!std::regex_search(iter, std::end(input), match, regex, flag)) continue;
             if(match.position(0) != 0) continue;
             if(match.length(0) < 1) continue;
 
@@ -79,23 +73,26 @@ vector<string> tokenize(const string& input) {
             match_found = true;
         }
 
-        if(!match_found)
-            cerr << "no match for string\"" << *iter << "\""<< endl;
+        // Check for invalid expressions
+        std::string got_str(iter, std::end(input));
+        check_valid_expression(!match_found, "Erro: Invalid expression %s", got_str);
     }
     return tokens;
 }
 
-shared_ptr<MalToken> read_str(const string &input) {
+std::shared_ptr<MalToken> read_str(const std::string &input) {
 
     Reader reader(tokenize(input));
+    //reader.print_tokens();
     MalTokenPtr ret;
 
-    if(!reader.empty())
+    if(!reader.empty()){
         ret = read_form(reader);
-    else
-        ret = nullptr;
+    }else{
+        throw EmptyInput();
+    }
 
-    shared_ptr<MalToken> ast(ret);
+    std::shared_ptr<MalToken> ast(ret);
 
     return ast;
 }
@@ -104,36 +101,103 @@ MalTokenPtr read_form(Reader& reader) {
 
     MalTokenPtr ast;
 
-    if(reader.peek()[0] == '(') {
-        reader.next();
-        ast = read_list(reader);
-    }else{
-        ast = read_atom(reader);
+    switch(reader.peek()[0]) {
+        case '(':
+            reader.next();
+            ast = read_list(reader, ')');
+            break;
+        case '[':
+            reader.next();
+            ast = read_list(reader, ']');
+            break;
+        case '{':
+            reader.next();
+            ast = read_list(reader, '}');
+            break;
+        case '"':
+            check_list_balance(reader.peek().back() != '"' || \
+                    reader.peek().size() == 1,
+                    "Error: Expected '%c', got %s", '"', "EOF");
+        default:
+            ast = read_atom(reader);
     }
+    return ast;
+}
+
+MalTokenPtr read_list(Reader& reader, char end_char) {
+
+    MalTokenList* ast = new MalTokenList(end_char);
+
+    while(reader.peek()[0] != end_char) {
+        check_list_balance(reader.is_eof(), "Error: Expected '%c', got %s", end_char, "EOF");
+        ast->list.push_back(std::shared_ptr<MalToken>(read_form(reader)));
+    }
+    reader.next();
 
     return ast;
 }
 
-MalTokenPtr read_list(Reader& reader) {
+MalTokenPtr read_quote(std::string token, Reader& reader) {
 
-    MalTokenList* ast = new MalTokenList;
+    MalTokenList* ast = new MalTokenList(')');
+    ast->list.push_back(std::shared_ptr<MalToken>(new MalTokenSymbol(token)));
+    check_valid_expression(reader.is_eof(), "Error: Expected expression, got %s", "EOF");
+    ast->list.push_back(std::shared_ptr<MalToken>(read_form(reader)));
 
-    while(reader.peek()[0] != ')')
-        ast->list.push_back(shared_ptr<MalToken>(read_form(reader)));
-    reader.next();
+    return ast;
+}
+
+MalTokenPtr read_meta(std::string token, Reader& reader) {
+
+    MalTokenPtr aux;
+    MalTokenList* ast = new MalTokenList(')');
+
+    ast->list.push_back(std::shared_ptr<MalToken>(new MalTokenSymbol(token)));
+
+    check_valid_expression(reader.is_eof(), "Error: Expected expression, got %s", "EOF");
+    aux = read_form(reader);
+
+    check_valid_expression(reader.is_eof(), "Error: Expected expression, got %s", "EOF");
+    ast->list.push_back(std::shared_ptr<MalToken>(read_form(reader)));
+
+    ast->list.push_back(std::shared_ptr<MalToken>(aux));
 
     return ast;
 }
 
 MalTokenPtr read_atom(Reader& reader) {
 
-    string token = reader.next();
-    return new MalTokenSymbol(token);
+    MalTokenPtr ast;
+    std::string token = reader.next();
+
+    switch (token[0]) {
+        case '`':
+            ast = read_quote("quasiquote", reader);
+            break;
+        case '\'':
+            ast = read_quote("quote", reader);
+            break;
+        case '~':
+            if (token.size() == 1)
+                ast = read_quote("unquote", reader);
+            else
+                ast = read_quote("splice-unquote", reader);
+            break;
+        case '^':
+            ast = read_meta("with-meta", reader);
+            break;
+        case '@':
+            ast = read_quote("deref", reader);
+            break;
+        default:
+            ast = new MalTokenSymbol(token);
+    }
+    return ast;
 }
 
 void Reader::print_tokens() const {
     for(auto token : tokens)
-        cout << token << endl;
+        std::cout << token << std::endl;
     return;
 }
 
