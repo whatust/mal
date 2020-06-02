@@ -17,7 +17,7 @@ std::string pr_str(std::shared_ptr<MalToken> ast){
             case NUMBER: {
                 std::shared_ptr<MalTokenNumber> number_ast;
                 number_ast = static_pointer_cast<MalTokenNumber>(ast);
-                ret = number_ast->value;
+                ret = std::to_string(number_ast->value);
                 break;
             }
 
@@ -39,6 +39,9 @@ std::string pr_str(std::shared_ptr<MalToken> ast){
                 ret += list_ast->close_char;
                 break;
            }
+           case OPERATOR: {
+                throw "Unexpected Operator";
+            }
         }
     }
     return ret;

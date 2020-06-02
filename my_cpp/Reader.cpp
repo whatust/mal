@@ -3,6 +3,7 @@
 using std::regex_constants::match_continuous;
 
 static const std::regex WHITESPACES_REGEX("[\\s,]+");
+static const std::regex NUMBER_REGEX("^[-+]?[0-9]+");
 static const std::regex TOKEN_REGEX[] = {
     std::regex("~@"),                        // Special two characters
     std::regex("[\\[\\]{}()'`~^@]"),         // Special single characters
@@ -73,7 +74,7 @@ StringVector tokenize(const std::string& input) {
             match_found = true;
         }
 
-        // Check 
+        // Check
         check_list_balance(!match_found, "Error: Expected '%c', got %s", '"', "EOF");
     }
     return tokens;
@@ -113,11 +114,8 @@ MalTokenPtr read_form(Reader& reader) {
             reader.next();
             ast = read_list(reader, '}');
             break;
-        /*case '"':
-            check_list_balance(reader.peek().back() != '"' || \
-                    reader.peek().size() == 1,
-                    "Error: Expected '%c', got %s", '"', "EOF");*/
         default:
+
             ast = read_atom(reader);
     }
     return ast;
@@ -189,7 +187,15 @@ MalTokenPtr read_atom(Reader& reader) {
             ast = read_quote("deref", reader);
             break;
         default:
-            ast = new MalTokenSymbol(token);
+
+            std::smatch match;
+            auto flag = match_continuous;
+
+            if (regex_search(token, match, NUMBER_REGEX, flag)) {
+                ast = new MalTokenNumber(token);
+            } else {
+                ast = new MalTokenSymbol(token);
+            }
     }
     return ast;
 }
@@ -203,3 +209,4 @@ void Reader::print_tokens() const {
 bool Reader::empty() const {
     return tokens.empty();
 }
+
