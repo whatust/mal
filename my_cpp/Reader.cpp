@@ -103,28 +103,33 @@ MalTokenPtr read_form(Reader& reader) {
 
     switch(reader.peek()[0]) {
         case '(':
-            reader.next();
-            ast = read_list(reader, ')');
-            break;
         case '[':
-            reader.next();
-            ast = read_list(reader, ']');
-            break;
         case '{':
-            reader.next();
-            ast = read_list(reader, '}');
+            ast = read_list(reader, reader.peek()[0]);
             break;
         default:
-
             ast = read_atom(reader);
     }
     return ast;
 }
 
-MalTokenPtr read_list(Reader& reader, char end_char) {
+MalTokenPtr read_list(Reader& reader, char open_char) {
 
-    MalTokenList* ast = new MalTokenList(end_char);
+    char end_char;
+    MalTokenList* ast = new MalTokenList();
 
+    if (open_char == '(') {
+        end_char = ')';
+        ast->type = LIST;
+    } else if (open_char == '[') {
+        end_char = ']';
+        ast->type = VECTOR;
+    } else {
+        end_char = '}';
+        ast->type = HASH_MAP;
+    }
+
+    reader.next();
     while(reader.peek()[0] != end_char) {
         check_list_balance(reader.is_eof(), "Error: Expected '%c', got %s", end_char, "EOF");
         ast->list.push_back(std::shared_ptr<MalToken>(read_form(reader)));
@@ -136,7 +141,7 @@ MalTokenPtr read_list(Reader& reader, char end_char) {
 
 MalTokenPtr read_quote(std::string token, Reader& reader) {
 
-    MalTokenList* ast = new MalTokenList(')');
+    MalTokenList* ast = new MalTokenList();
     ast->list.push_back(std::shared_ptr<MalToken>(new MalTokenSymbol(token)));
     check_valid_expression(reader.is_eof(), "Error: Expected expression, got %s", "EOF");
     ast->list.push_back(std::shared_ptr<MalToken>(read_form(reader)));
@@ -147,7 +152,7 @@ MalTokenPtr read_quote(std::string token, Reader& reader) {
 MalTokenPtr read_meta(std::string token, Reader& reader) {
 
     MalTokenPtr aux;
-    MalTokenList* ast = new MalTokenList(')');
+    MalTokenList* ast = new MalTokenList();
 
     ast->list.push_back(std::shared_ptr<MalToken>(new MalTokenSymbol(token)));
 

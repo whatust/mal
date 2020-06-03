@@ -12,7 +12,7 @@ using std::static_pointer_cast;
 typedef std::vector<std::string> StringVector;
 class EmptyInput : public std::exception {};
 
-enum tokenType { SYMBOL, NUMBER, LIST, OPERATOR};
+enum tokenType { SYMBOL, NUMBER, LIST, VECTOR, HASH_MAP, OPERATOR };
 
 class MalToken {
 
@@ -22,7 +22,8 @@ class MalToken {
 };
 
 typedef MalToken* MalTokenPtr;
-typedef std::function<std::shared_ptr<MalToken>(std::vector<std::shared_ptr<MalToken>>::const_iterator)> MalFunction;
+typedef std::vector<std::shared_ptr<MalToken>>::const_iterator MalArgs;
+typedef std::function<std::shared_ptr<MalToken>(MalArgs, MalArgs)> MalFunction;
 typedef std::unordered_map<std::string, MalFunction> MalEnv;
 
 class MalTokenSymbol : public MalToken {
@@ -48,10 +49,21 @@ class MalTokenNumber : public MalToken {
 
 class MalTokenList : public MalToken {
     public:
-        char close_char;
-        char open_char;
         std::vector<std::shared_ptr<MalToken>> list;
-        MalTokenList(const char _end_char);
+        MalTokenList();
+};
+
+class MalTokenVector : public MalToken {
+    public:
+        std::vector<std::shared_ptr<MalToken>> list;
+        MalTokenVector();
+};
+
+class MalTokenHashMap : public MalToken {
+    public:
+        std::vector<std::shared_ptr<MalToken>> key;
+        std::vector<std::shared_ptr<MalToken>> value;
+        MalTokenHashMap();
 };
 
 #endif  //TYPE_H_

@@ -6,10 +6,10 @@
 
 std::shared_ptr<MalToken> eval_ast (std::shared_ptr<MalToken> ast, MalEnv& repl_env);
 std::shared_ptr<MalToken> eval(std::shared_ptr<MalToken>, MalEnv& repl_env);
-std::shared_ptr<MalToken> addFunction(std::vector<std::shared_ptr<MalToken>>::const_iterator args);
-std::shared_ptr<MalToken> subFunction(std::vector<std::shared_ptr<MalToken>>::const_iterator args);
-std::shared_ptr<MalToken> mulFunction(std::vector<std::shared_ptr<MalToken>>::const_iterator args);
-std::shared_ptr<MalToken> divFunction(std::vector<std::shared_ptr<MalToken>>::const_iterator args);
+std::shared_ptr<MalToken> addFunction(MalArgs args, MalArgs end);
+std::shared_ptr<MalToken> subFunction(MalArgs args, MalArgs end);
+std::shared_ptr<MalToken> mulFunction(MalArgs args, MalArgs end);
+std::shared_ptr<MalToken> divFunction(MalArgs args, MalArgs end);
 
 #endif // EVALUATION_H_
 

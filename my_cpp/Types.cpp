@@ -19,20 +19,12 @@ MalTokenNumber::MalTokenNumber(int _number)
 : MalToken(NUMBER)
 , value(_number){};
 
-MalTokenList::MalTokenList(const char _end_char)
-: MalToken(LIST), close_char(_end_char){
-    switch(close_char) {
-        case ')':
-            open_char = '(';
-            break;
-        case ']':
-            open_char = '[';
-            break;
-        case '}':
-            open_char = '{';
-            break;
-        case '"':
-            open_char = '"';
-    }
-};
+MalTokenList::MalTokenList()
+: MalToken(LIST) {};
+
+MalTokenVector::MalTokenVector()
+: MalToken(VECTOR) {};
+
+MalTokenHashMap::MalTokenHashMap()
+: MalToken(HASH_MAP) {};
 
