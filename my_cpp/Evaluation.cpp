@@ -87,9 +87,10 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, MalEnv& repl_env) 
                 std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "let*"){
 
                 check_arguments(list_ast->list.size() - 1 != 2, "2", std::to_string(list_ast->list.size() - 1));
-                check_token(list_ast->list[1]->type != LIST, LIST, list_ast->list[1]->type);
+                check_token(list_ast->list[1]->type != LIST && list_ast->list[1]->type != LIST_V,
+                                                                LIST, list_ast->list[1]->type);
 
-                MalEnv new_repl_env(repl_env);
+                MalEnv new_repl_env(&repl_env);
                 std::shared_ptr<AstTokenList> bindings;
 
                 bindings = std::static_pointer_cast<AstTokenList>(list_ast->list[1]);
