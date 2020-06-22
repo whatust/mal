@@ -76,14 +76,32 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, MalEnv& repl_env) 
                 std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "def!"){
 
                 check_arguments(list_ast->list.size() - 1 != 2, "2", std::to_string(list_ast->list.size() - 1));
-
                 check_token(list_ast->list[1]->type != SYMBOL, SYMBOL, list_ast->list[1]->type);
-                std::string key_token = std::static_pointer_cast<AstTokenSymbol>(list_ast->list[1])->name;
 
+                std::string key_token = std::static_pointer_cast<AstTokenSymbol>(list_ast->list[1])->name;
                 std::shared_ptr<AstToken> value = eval(list_ast->list[2], repl_env);
                 repl_env.set(key_token, value);
 
                 ret = value;
+            } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
+                std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "let*"){
+
+                check_arguments(list_ast->list.size() - 1 != 2, "2", std::to_string(list_ast->list.size() - 1));
+                check_token(list_ast->list[1]->type != LIST, LIST, list_ast->list[1]->type);
+
+                MalEnv new_repl_env(repl_env);
+                std::shared_ptr<AstTokenList> bindings;
+
+                bindings = std::static_pointer_cast<AstTokenList>(list_ast->list[1]);
+                check_map(bindings->list.size() % 2);
+
+                for(auto it=std::begin(bindings->list); it != std::end(bindings->list);){
+
+                    check_token((*it)->type != SYMBOL, SYMBOL, (*it)->type);
+                    std::string key = std::static_pointer_cast<AstTokenSymbol>(*(it++))->name;
+                    new_repl_env.set(key, eval(*(it++), new_repl_env));
+                }
+                ret = eval(list_ast->list[2], new_repl_env);
             } else {
                 list_ast = static_pointer_cast<AstTokenList> (eval_ast(ast, repl_env));
 
