@@ -19,9 +19,9 @@ void pr_list(std::string& ret, std::shared_ptr<T> ast) {
 template<class T>
 void pr_hash(std::string& ret, std::shared_ptr<T> ast) {
 
-    for(size_t i=0; i < ast->key.size(); i++) {
-        ret += pr_str(ast->key[i]) + " ";
-        ret += pr_str(ast->value[i]) + " ";
+    for(auto it : ast->map) {
+        ret += it.first + " ";
+        ret += pr_str(it.second) + " ";
     }
 
     // Erase space after the last element of the list
@@ -34,7 +34,7 @@ void pr_hash(std::string& ret, std::shared_ptr<T> ast) {
     return;
 }
 
-std::string pr_str(std::shared_ptr<MalToken> ast){
+std::string pr_str(std::shared_ptr<AstToken> ast){
 
     std::string ret = "";
 
@@ -42,32 +42,34 @@ std::string pr_str(std::shared_ptr<MalToken> ast){
         switch(ast->type) {
 
             case SYMBOL: {
-                std::shared_ptr<MalTokenSymbol> symbol_ast;
-                symbol_ast = static_pointer_cast<MalTokenSymbol>(ast);
+                std::shared_ptr<AstTokenSymbol> symbol_ast;
+                symbol_ast = static_pointer_cast<AstTokenSymbol>(ast);
                 ret = symbol_ast->name;
                 break;
             }
 
             case NUMBER: {
-                std::shared_ptr<MalTokenNumber> number_ast;
-                number_ast = static_pointer_cast<MalTokenNumber>(ast);
+                std::shared_ptr<AstTokenNumber> number_ast;
+                number_ast = static_pointer_cast<AstTokenNumber>(ast);
                 ret = std::to_string(number_ast->value);
                 break;
             }
 
+            case LIST_H:
             case LIST: {
-                std::shared_ptr<MalTokenList> list_ast;
-                list_ast = static_pointer_cast<MalTokenList>(ast);
+                std::shared_ptr<AstTokenList> list_ast;
+                list_ast = static_pointer_cast<AstTokenList>(ast);
 
-                ret = "(";
+                ret = ast->type == LIST ? "(" : "{";
                 pr_list(ret, list_ast);
-                ret += ")";
+                ret += ast->type == LIST ? ")" : "}";
 
                 break;
             }
+            case LIST_V:
             case VECTOR: {
-                std::shared_ptr<MalTokenVector> vect_ast;
-                vect_ast = static_pointer_cast<MalTokenVector>(ast);
+                std::shared_ptr<AstTokenVector> vect_ast;
+                vect_ast = static_pointer_cast<AstTokenVector>(ast);
 
                 ret = "[";
                 pr_list(ret, vect_ast);
@@ -76,8 +78,8 @@ std::string pr_str(std::shared_ptr<MalToken> ast){
                 break;
            }
            case HASH_MAP: {
-                std::shared_ptr<MalTokenHashMap> hash_ast;
-                hash_ast = static_pointer_cast<MalTokenHashMap>(ast);
+                std::shared_ptr<AstTokenHashMap> hash_ast;
+                hash_ast = static_pointer_cast<AstTokenHashMap>(ast);
 
                 ret = "{";
                 pr_hash(ret, hash_ast);

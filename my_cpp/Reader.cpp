@@ -75,16 +75,16 @@ StringVector tokenize(const std::string& input) {
         }
 
         // Check
-        check_list_balance(!match_found, "Error: Expected '%c', got %s", '"', "EOF");
+        check_list_balance(!match_found, "\"", "EOF");
     }
     return tokens;
 }
 
-std::shared_ptr<MalToken> read_str(const std::string &input) {
+std::shared_ptr<AstToken> read_str(const std::string &input) {
 
     Reader reader(tokenize(input));
     //reader.print_tokens();
-    MalTokenPtr ret;
+    AstTokenPtr ret;
 
     if(!reader.empty()){
         ret = read_form(reader);
@@ -92,14 +92,14 @@ std::shared_ptr<MalToken> read_str(const std::string &input) {
         throw EmptyInput();
     }
 
-    std::shared_ptr<MalToken> ast(ret);
+    std::shared_ptr<AstToken> ast(ret);
 
     return ast;
 }
 
-MalTokenPtr read_form(Reader& reader) {
+AstTokenPtr read_form(Reader& reader) {
 
-    MalTokenPtr ast;
+    AstTokenPtr ast;
 
     switch(reader.peek()[0]) {
         case '(':
@@ -113,63 +113,65 @@ MalTokenPtr read_form(Reader& reader) {
     return ast;
 }
 
-MalTokenPtr read_list(Reader& reader, char open_char) {
+AstTokenPtr read_list(Reader& reader, char open_char) {
 
-    char end_char;
-    MalTokenList* ast = new MalTokenList();
+    std::string end_str;
+    AstTokenList* ast = new AstTokenList();
 
     if (open_char == '(') {
-        end_char = ')';
+        end_str = ")";
         ast->type = LIST;
     } else if (open_char == '[') {
-        end_char = ']';
-        ast->type = VECTOR;
+        end_str = "]";
+        ast->type = LIST_V;
     } else {
-        end_char = '}';
-        ast->type = HASH_MAP;
+        end_str = "}";
+        ast->type = LIST_H;
     }
 
     reader.next();
-    while(reader.peek()[0] != end_char) {
-        check_list_balance(reader.is_eof(), "Error: Expected '%c', got %s", end_char, "EOF");
-        ast->list.push_back(std::shared_ptr<MalToken>(read_form(reader)));
+    check_list_balance(reader.is_eof(), end_str, "EOF");
+
+    while(reader.peek() != end_str) {
+        ast->list.push_back(std::shared_ptr<AstToken>(read_form(reader)));
+        check_list_balance(reader.is_eof(), end_str, "EOF");
     }
     reader.next();
 
     return ast;
 }
 
-MalTokenPtr read_quote(std::string token, Reader& reader) {
+AstTokenPtr read_quote(std::string token, Reader& reader) {
 
-    MalTokenList* ast = new MalTokenList();
-    ast->list.push_back(std::shared_ptr<MalToken>(new MalTokenSymbol(token)));
-    check_valid_expression(reader.is_eof(), "Error: Expected expression, got %s", "EOF");
-    ast->list.push_back(std::shared_ptr<MalToken>(read_form(reader)));
+    AstTokenList* ast = new AstTokenList();
+    ast->list.push_back(std::shared_ptr<AstToken>(new AstTokenSymbol(token)));
+    check_valid_expression(reader.is_eof(), "expression", "EOF");
+    ast->list.push_back(std::shared_ptr<AstToken>(read_form(reader)));
 
     return ast;
 }
 
-MalTokenPtr read_meta(std::string token, Reader& reader) {
+AstTokenPtr read_meta(std::string token, Reader& reader) {
 
-    MalTokenPtr aux;
-    MalTokenList* ast = new MalTokenList();
+    AstTokenPtr aux;
+    AstTokenList* ast = new AstTokenList();
 
-    ast->list.push_back(std::shared_ptr<MalToken>(new MalTokenSymbol(token)));
+    ast->list.push_back(std::shared_ptr<AstToken>(new AstTokenSymbol(token)));
 
-    check_valid_expression(reader.is_eof(), "Error: Expected expression, got %s", "EOF");
+    check_valid_expression(reader.is_eof(), "expression", "EOF");
     aux = read_form(reader);
 
-    check_valid_expression(reader.is_eof(), "Error: Expected expression, got %s", "EOF");
-    ast->list.push_back(std::shared_ptr<MalToken>(read_form(reader)));
+    check_valid_expression(reader.is_eof(), "expression", "EOF");
+    ast->list.push_back(std::shared_ptr<AstToken>(read_form(reader)));
 
-    ast->list.push_back(std::shared_ptr<MalToken>(aux));
+    ast->list.push_back(std::shared_ptr<AstToken>(aux));
 
     return ast;
 }
 
-MalTokenPtr read_atom(Reader& reader) {
+AstTokenPtr read_atom(Reader& reader) {
 
-    MalTokenPtr ast;
+    AstTokenPtr ast;
     std::string token = reader.next();
 
     switch (token[0]) {
@@ -197,9 +199,9 @@ MalTokenPtr read_atom(Reader& reader) {
             auto flag = match_continuous;
 
             if (regex_search(token, match, NUMBER_REGEX, flag)) {
-                ast = new MalTokenNumber(token);
+                ast = new AstTokenNumber(token);
             } else {
-                ast = new MalTokenSymbol(token);
+                ast = new AstTokenSymbol(token);
             }
     }
     return ast;

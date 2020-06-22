@@ -8,7 +8,7 @@ CXXFLAGS=-O3 -Wall $(DEBUG) $(INCPATHS) -std=c++17 -lstdc++fs
 LDFLAGS=-O3 $(DEBUG) $(LIBPATHS) -L. -lreadline -lhistory
 
 LIBSOURCES=ReadLine.cpp Reader.cpp Types.cpp Printer.cpp Validation.cpp \
-		   Evaluation.cpp
+		   Evaluation.cpp Environment.cpp
 LIBOBJS=$(LIBSOURCES:%.cpp=%.o)
 
 MAINS=$(wildcard step*.cpp)
@@ -19,7 +19,7 @@ TARGETS=$(MAINS:%.cpp=%)
 .SUFFIXES: .cpp .o
 
 all: $(TARGETS)
-	mv step2_eval run
+	mv step3_env run
 
 dist: mal
 

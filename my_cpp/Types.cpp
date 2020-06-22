@@ -1,30 +1,33 @@
 #include"Types.h"
 
-MalToken::MalToken(tokenType _type) : type(_type){};
+AstToken::AstToken(tokenType _type) : type(_type){};
 
-MalTokenSymbol::MalTokenSymbol(std::string& _name)
-: MalToken(SYMBOL)
+AstTokenSymbol::AstTokenSymbol(std::string& _name)
+: AstToken(SYMBOL)
 , name(_name){};
 
-MalTokenOperator::MalTokenOperator(const std::string& symbol, MalEnv& repl_env)
-: MalToken(OPERATOR) {
-    op = repl_env.find(symbol)->second;
+AstTokenOperator::AstTokenOperator(MalFunction _op)
+: AstToken(OPERATOR)
+, op(_op) {};
+
+std::shared_ptr<AstToken> AstTokenOperator::operator()(MalArgs args, MalArgs end) {
+    return op(args, end);
 };
 
-MalTokenNumber::MalTokenNumber(const std::string& _number)
-: MalToken(NUMBER)
+AstTokenNumber::AstTokenNumber(const std::string& _number)
+: AstToken(NUMBER)
 , value(stoi(_number)){};
 
-MalTokenNumber::MalTokenNumber(int _number)
-: MalToken(NUMBER)
+AstTokenNumber::AstTokenNumber(int _number)
+: AstToken(NUMBER)
 , value(_number){};
 
-MalTokenList::MalTokenList()
-: MalToken(LIST) {};
+AstTokenList::AstTokenList()
+: AstToken(LIST) {};
 
-MalTokenVector::MalTokenVector()
-: MalToken(VECTOR) {};
+AstTokenVector::AstTokenVector()
+: AstToken(VECTOR) {};
 
-MalTokenHashMap::MalTokenHashMap()
-: MalToken(HASH_MAP) {};
+AstTokenHashMap::AstTokenHashMap()
+: AstToken(HASH_MAP) {};
 

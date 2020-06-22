@@ -1,57 +1,59 @@
 #include"Evaluation.h"
 
-std::shared_ptr<MalToken> eval_ast (std::shared_ptr<MalToken> ast, MalEnv& repl_env) {
+std::shared_ptr<AstToken> eval_ast (std::shared_ptr<AstToken> ast, MalEnv& repl_env) {
 
-    std::shared_ptr<MalToken> ret;
+    std::shared_ptr<AstToken> ret;
 
     switch (ast->type) {
         case SYMBOL: {
             std::string symbol;
-            std::shared_ptr<MalTokenSymbol> symbol_ast;
+            std::shared_ptr<AstTokenSymbol> symbol_ast;
 
-            symbol_ast = static_pointer_cast<MalTokenSymbol> (ast);
+            symbol_ast = static_pointer_cast<AstTokenSymbol> (ast);
             symbol = symbol_ast->name;
 
-            check_valid_symbol(repl_env.find(symbol) == std::end(repl_env), "Unknown symbol: %s", symbol);
-
-            ret = std::shared_ptr<MalToken>(new MalTokenOperator(symbol, repl_env));
+            ret = repl_env.get(symbol);
             break;
         }
         case LIST: {
-            std::shared_ptr<MalTokenList> list_ast;
-            list_ast = static_pointer_cast<MalTokenList>(ast);
-            std::shared_ptr<MalTokenList> new_list_ast(new MalTokenList());
+            std::shared_ptr<AstTokenList> list_ast;
+            list_ast = static_pointer_cast<AstTokenList>(ast);
+            std::shared_ptr<AstTokenList> new_list_ast(new AstTokenList());
 
             for (auto token : list_ast->list) {
                 new_list_ast->list.push_back(eval(token, repl_env));
             }
-            ret = std::static_pointer_cast<MalToken>(new_list_ast);
+            ret = std::static_pointer_cast<AstToken>(new_list_ast);
             break;
         }
-        case VECTOR: {
-            std::shared_ptr<MalTokenList> list_ast;
-            list_ast = static_pointer_cast<MalTokenList>(ast);
-            std::shared_ptr<MalTokenVector> vect_ast(new MalTokenVector);
+        case LIST_V: {
+            std::shared_ptr<AstTokenList> list_ast;
+            list_ast = static_pointer_cast<AstTokenList>(ast);
+            std::shared_ptr<AstTokenVector> vect_ast(new AstTokenVector);
 
             for (auto token : list_ast->list) {
                 vect_ast->list.push_back(eval(token, repl_env));
             }
-            ret = std::static_pointer_cast<MalToken>(vect_ast);
+            ret = std::static_pointer_cast<AstToken>(vect_ast);
             break;
         }
-        case HASH_MAP: {
-            std::shared_ptr<MalTokenList> list_ast;
-            list_ast = static_pointer_cast<MalTokenList>(ast);
-            std::shared_ptr<MalTokenHashMap> hash_ast(new MalTokenHashMap);
+        case LIST_H: {
+            std::shared_ptr<AstTokenList> list_ast;
+            list_ast = static_pointer_cast<AstTokenList>(ast);
+            std::shared_ptr<AstTokenHashMap> hash_ast(new AstTokenHashMap);
 
             auto token=std::begin(list_ast->list);
+            //check_map((std::end(list_ast->list) - token) % 2 || std::end(list_ast->list) - token == 0);
+            check_map((std::end(list_ast->list) - token) % 2);
+
             while (token != std::end(list_ast->list)) {
-                hash_ast->key.push_back(*(token++));
-                check_map(token == std::end(list_ast->list), "Hashmap entry with no value");
-                hash_ast->value.push_back(eval(*(token++), repl_env));
+
+                std::shared_ptr<AstTokenSymbol> key_token = std::static_pointer_cast<AstTokenSymbol>(*(token++));
+                std::string aux = key_token->name;
+                hash_ast->map.insert(std::pair<std::string, std::shared_ptr<AstToken>>(std::move(aux), eval(*(token++), repl_env)));
             }
 
-            ret = std::static_pointer_cast<MalToken>(hash_ast);
+            ret = std::static_pointer_cast<AstToken>(hash_ast);
             break;
         }
         default: {
@@ -61,26 +63,41 @@ std::shared_ptr<MalToken> eval_ast (std::shared_ptr<MalToken> ast, MalEnv& repl_
     return ret;
 }
 
-std::shared_ptr<MalToken> eval(std::shared_ptr<MalToken> ast, MalEnv& repl_env) {
+std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, MalEnv& repl_env) {
 
-    std::shared_ptr<MalToken> ret;
+    std::shared_ptr<AstToken> ret;
 
     switch (ast->type) {
         case LIST: {
-            std::shared_ptr<MalTokenList> list_ast;
-            list_ast = static_pointer_cast<MalTokenList> (eval_ast(ast, repl_env));
 
-            if (list_ast->list.empty()) {
-                ret = ast;
-                break;
+            std::shared_ptr<AstTokenList> list_ast = std::static_pointer_cast<AstTokenList>(ast);
+
+            if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
+                std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "def!"){
+
+                check_arguments(list_ast->list.size() - 1 != 2, "2", std::to_string(list_ast->list.size() - 1));
+
+                check_token(list_ast->list[1]->type != SYMBOL, SYMBOL, list_ast->list[1]->type);
+                std::string key_token = std::static_pointer_cast<AstTokenSymbol>(list_ast->list[1])->name;
+
+                std::shared_ptr<AstToken> value = eval(list_ast->list[2], repl_env);
+                repl_env.set(key_token, value);
+
+                ret = value;
+            } else {
+                list_ast = static_pointer_cast<AstTokenList> (eval_ast(ast, repl_env));
+
+                if (list_ast->list.empty()) {
+                    ret = ast;
+                    break;
+                }
+
+                check_token (list_ast->list[0]->type != OPERATOR, OPERATOR, list_ast->list[0]->type);
+                std::shared_ptr<AstTokenOperator> opToken;
+
+                opToken = std::static_pointer_cast<AstTokenOperator>(eval(list_ast->list[0], repl_env));
+                ret = (*opToken)(++(std::cbegin(list_ast->list)), std::cend(list_ast->list));
             }
-
-            check_token (list_ast->list[0]->type != OPERATOR,
-                    "Expected token type OPERATOR got: %s", list_ast->list[0]->type);
-            std::shared_ptr<MalTokenOperator> opToken;
-
-            opToken = std::static_pointer_cast<MalTokenOperator>(eval(list_ast->list[0], repl_env));
-            ret = opToken->op(++(std::cbegin(list_ast->list)), std::cend(list_ast->list));
 
             break;
         }
@@ -91,42 +108,39 @@ std::shared_ptr<MalToken> eval(std::shared_ptr<MalToken> ast, MalEnv& repl_env) 
 }
 
 
-std::shared_ptr<MalToken> addFunction(MalArgs args, MalArgs end) {
+std::shared_ptr<AstToken> addFunction(MalArgs args, MalArgs end) {
 
-    check_arguments(args == end, "Insuficient Number of arguments expected 2 got: 0");
-    int num_a = std::static_pointer_cast<MalTokenNumber>(*args++)->value;
-    check_arguments(args == end, "Insuficient Number of arguments expected 2 got: 1");
-    int num_b = std::static_pointer_cast<MalTokenNumber>(*args)->value;
+    check_arguments(end - args != 2, "2", std::to_string(end - args));
+    int num_a = std::static_pointer_cast<AstTokenNumber>(*args++)->value;
+    int num_b = std::static_pointer_cast<AstTokenNumber>(*args)->value;
 
-    return std::shared_ptr<MalTokenNumber>(new MalTokenNumber(num_a + num_b));
+    return std::shared_ptr<AstTokenNumber>(new AstTokenNumber(num_a + num_b));
 }
 
-std::shared_ptr<MalToken> subFunction(MalArgs args, MalArgs end) {
+std::shared_ptr<AstToken> subFunction(MalArgs args, MalArgs end) {
 
-    check_arguments(args == end, "Insuficient Number of arguments expected 2 got: 0");
-    int num_a = std::static_pointer_cast<MalTokenNumber>(*args++)->value;
-    check_arguments(args == end, "Insuficient Number of arguments expected 2 got: 1");
-    int num_b = std::static_pointer_cast<MalTokenNumber>(*args)->value;
+    check_arguments(end - args != 2, "2", std::to_string(end - args));
+    int num_a = std::static_pointer_cast<AstTokenNumber>(*args++)->value;
+    int num_b = std::static_pointer_cast<AstTokenNumber>(*args)->value;
 
-    return std::shared_ptr<MalTokenNumber>(new MalTokenNumber(num_a - num_b));
+    return std::shared_ptr<AstTokenNumber>(new AstTokenNumber(num_a - num_b));
 }
 
-std::shared_ptr<MalToken> mulFunction(MalArgs args, MalArgs end) {
+std::shared_ptr<AstToken> mulFunction(MalArgs args, MalArgs end) {
 
-    check_arguments(args == end, "Insuficient Number of arguments expected 2 got: 0");
-    int num_a = std::static_pointer_cast<MalTokenNumber>(*args++)->value;
-    check_arguments(args == end, "Insuficient Number of arguments expected 2 got: 1");
-    int num_b = std::static_pointer_cast<MalTokenNumber>(*args)->value;
+    check_arguments(end - args != 2, "2", std::to_string(end - args));
+    int num_a = std::static_pointer_cast<AstTokenNumber>(*args++)->value;
+    int num_b = std::static_pointer_cast<AstTokenNumber>(*args)->value;
 
-    return std::shared_ptr<MalTokenNumber>(new MalTokenNumber(num_a * num_b));
+    return std::shared_ptr<AstTokenNumber>(new AstTokenNumber(num_a * num_b));
 }
 
-std::shared_ptr<MalToken> divFunction(MalArgs args, MalArgs end) {
+std::shared_ptr<AstToken> divFunction(MalArgs args, MalArgs end) {
 
-    check_arguments(args == end, "Insuficient Number of arguments expected 2 got: 0");
-    int num_a = std::static_pointer_cast<MalTokenNumber>(*args++)->value;
-    check_arguments(args == end, "Insuficient Number of arguments expected 2 got: 1");
-    int num_b = std::static_pointer_cast<MalTokenNumber>(*args)->value;
+    check_arguments(end - args != 2, "2", std::to_string(end - args));
+    int num_a = std::static_pointer_cast<AstTokenNumber>(*args++)->value;
+    int num_b = std::static_pointer_cast<AstTokenNumber>(*args)->value;
 
-    return std::shared_ptr<MalTokenNumber>(new MalTokenNumber(num_a / num_b));
+    return std::shared_ptr<AstTokenNumber>(new AstTokenNumber(num_a / num_b));
 }
+

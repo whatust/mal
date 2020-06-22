@@ -6,6 +6,6 @@
 
 #include"Types.h"
 
-std::string pr_str(std::shared_ptr<MalToken> ast);
+std::string pr_str(std::shared_ptr<AstToken> ast);
 
 #endif  // PRINTER_H_

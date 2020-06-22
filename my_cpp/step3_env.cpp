@@ -20,6 +20,7 @@ int main(int argc, char* argv[]) {
     std::string input;
 
     MalEnv repl_env;
+
     repl_env.set("+", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&addFunction))));
     repl_env.set("-", std::static_pointer_cast<AstToken>(
@@ -28,6 +29,7 @@ int main(int argc, char* argv[]) {
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&mulFunction))));
     repl_env.set("/", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&divFunction))));
+
     while(readLine.read(prompt, input)) {
 
         std::string out;

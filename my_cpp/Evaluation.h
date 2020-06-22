@@ -3,13 +3,14 @@
 
 #include"Types.h"
 #include"Validation.h"
+#include "Environment.h"
 
-std::shared_ptr<MalToken> eval_ast (std::shared_ptr<MalToken> ast, MalEnv& repl_env);
-std::shared_ptr<MalToken> eval(std::shared_ptr<MalToken>, MalEnv& repl_env);
-std::shared_ptr<MalToken> addFunction(MalArgs args, MalArgs end);
-std::shared_ptr<MalToken> subFunction(MalArgs args, MalArgs end);
-std::shared_ptr<MalToken> mulFunction(MalArgs args, MalArgs end);
-std::shared_ptr<MalToken> divFunction(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> eval_ast (std::shared_ptr<AstToken> ast, MalEnv& repl_env);
+std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken>, MalEnv& repl_env);
+std::shared_ptr<AstToken> addFunction(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> subFunction(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> mulFunction(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> divFunction(MalArgs args, MalArgs end);
 
 #endif // EVALUATION_H_
 
