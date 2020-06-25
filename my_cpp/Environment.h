@@ -9,6 +9,7 @@
 class MalEnv {
 private:
     MalEnv *outer;
+    std::unordered_map<std::string, std::shared_ptr<AstToken>> bindings;
     std::unordered_map<std::string, std::shared_ptr<AstToken>> data;
 public:
     MalEnv() : outer(nullptr) {};

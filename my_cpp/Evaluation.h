@@ -11,6 +11,11 @@ std::shared_ptr<AstToken> addFunction(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> subFunction(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> mulFunction(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> divFunction(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> eqFunction(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> ltFunction(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> lteFunction(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> gtFunction(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> gteFunction(MalArgs args, MalArgs end);
 
 #endif // EVALUATION_H_
 

@@ -87,9 +87,24 @@ std::string pr_str(std::shared_ptr<AstToken> ast){
 
                 break;
            }
+           case BOOL: {
+                std::shared_ptr<AstTokenBool> bool_ast;
+                bool_ast = static_pointer_cast<AstTokenBool>(ast);
+                ret = bool_ast->value ? "true" : "false";
+
+                break;
+           }
+           case NIL: {
+                ret = "nil";
+                break;
+           }
+           case FUNCTION: {
+                ret = "#<function>";
+                break;
+           }
            case OPERATOR: {
                 throw "Unexpected Operator";
-            }
+           }
         }
     }
     return ret;

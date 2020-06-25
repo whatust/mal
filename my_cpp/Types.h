@@ -12,9 +12,10 @@ using std::static_pointer_cast;
 typedef std::vector<std::string> StringVector;
 class EmptyInput : public std::exception {};
 
-enum tokenType { SYMBOL, NUMBER, LIST, LIST_V, LIST_H, VECTOR, HASH_MAP, OPERATOR };
-class AstToken {
+enum tokenType { SYMBOL, NUMBER, LIST, LIST_V, LIST_H, VECTOR,
+                HASH_MAP, OPERATOR, BOOL, FUNCTION, NIL };
 
+class AstToken {
     public:
         tokenType type;
         AstToken(tokenType _type);
@@ -60,10 +61,20 @@ class AstTokenVector : public AstToken {
 
 class AstTokenHashMap : public AstToken {
     public:
-        //std::vector<std::shared_ptr<AstToken>> key;
-        //std::vector<std::shared_ptr<AstToken>> value;
         std::unordered_map<std::string, std::shared_ptr<AstToken>> map;
         AstTokenHashMap();
+};
+
+class AstTokenBool : public AstToken {
+    public:
+        bool value;
+        AstTokenBool(const std::string& _value);
+        AstTokenBool(bool _value);
+};
+
+class AstTokenNil : public AstToken {
+    public:
+        AstTokenNil();
 };
 
 #endif  //TYPE_H_

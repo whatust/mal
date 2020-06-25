@@ -19,7 +19,7 @@ TARGETS=$(MAINS:%.cpp=%)
 .SUFFIXES: .cpp .o
 
 all: $(TARGETS)
-	mv step3_env run
+	mv step4_if_fn_do run
 
 dist: mal
 

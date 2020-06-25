@@ -31,3 +31,15 @@ AstTokenVector::AstTokenVector()
 AstTokenHashMap::AstTokenHashMap()
 : AstToken(HASH_MAP) {};
 
+AstTokenBool::AstTokenBool(const std::string& _value)
+: AstToken(BOOL) {
+    value = _value == "true" ? true : false;
+};
+
+AstTokenBool::AstTokenBool(bool _value)
+: AstToken(BOOL)
+, value(_value) {};
+
+AstTokenNil::AstTokenNil()
+: AstToken(NIL) {};
+

@@ -200,6 +200,12 @@ AstTokenPtr read_atom(Reader& reader) {
 
             if (regex_search(token, match, NUMBER_REGEX, flag)) {
                 ast = new AstTokenNumber(token);
+            } else if (token == "true") {
+                ast = new AstTokenBool(true);
+            } else if (token == "false") {
+                ast = new AstTokenBool(false);
+            } else if (token == "nil") {
+                ast = new AstTokenNil();
             } else {
                 ast = new AstTokenSymbol(token);
             }

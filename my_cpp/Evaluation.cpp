@@ -103,6 +103,33 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, MalEnv& repl_env) 
                     new_repl_env.set(key, eval(*(it++), new_repl_env));
                 }
                 ret = eval(list_ast->list[2], new_repl_env);
+            } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
+                    std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "do") {
+
+                check_arguments(list_ast->list.size() < 2, "1", std::to_string(list_ast->list.size() - 1));
+
+                for(int i=1; i < (int) list_ast->list.size() - 1; i++){
+                    eval(list_ast->list[i], repl_env);
+                }
+
+                ret = eval(list_ast->list.back(), repl_env);
+
+            } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
+                    std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "if") {
+
+                check_arguments(list_ast->list.size() < 4, "3", std::to_string(list_ast->list.size() - 1));
+
+                std::shared_ptr<AstToken> condition;
+
+                condition = eval(list_ast->list[1], repl_env);
+
+                if(condition->type == NIL || (condition->type == BOOL && 
+                    !std::static_pointer_cast<AstTokenBool>(condition)->value)) {
+                    ret = eval(list_ast->list[3], repl_env);
+                } else {
+                    ret = eval(list_ast->list[2], repl_env);
+                }
+
             } else {
                 list_ast = static_pointer_cast<AstTokenList> (eval_ast(ast, repl_env));
 
@@ -162,4 +189,52 @@ std::shared_ptr<AstToken> divFunction(MalArgs args, MalArgs end) {
 
     return std::shared_ptr<AstTokenNumber>(new AstTokenNumber(num_a / num_b));
 }
+
+std::shared_ptr<AstToken> eqFunction(MalArgs args, MalArgs end) {
+
+    check_arguments(end - args != 2, "2", std::to_string(end - args));
+    int num_a = std::static_pointer_cast<AstTokenNumber>(*args++)->value;
+    int num_b = std::static_pointer_cast<AstTokenNumber>(*args)->value;
+
+    return std::shared_ptr<AstTokenBool>(new AstTokenBool(num_a == num_b));
+}
+
+std::shared_ptr<AstToken> ltFunction(MalArgs args, MalArgs end) {
+
+    check_arguments(end - args != 2, "2", std::to_string(end - args));
+    int num_a = std::static_pointer_cast<AstTokenNumber>(*args++)->value;
+    int num_b = std::static_pointer_cast<AstTokenNumber>(*args)->value;
+
+    return std::shared_ptr<AstTokenBool>(new AstTokenBool(num_a < num_b));
+}
+
+std::shared_ptr<AstToken> lteFunction(MalArgs args, MalArgs end) {
+
+    check_arguments(end - args != 2, "2", std::to_string(end - args));
+    int num_a = std::static_pointer_cast<AstTokenNumber>(*args++)->value;
+    int num_b = std::static_pointer_cast<AstTokenNumber>(*args)->value;
+
+    return std::shared_ptr<AstTokenBool>(new AstTokenBool(num_a <= num_b));
+}
+
+std::shared_ptr<AstToken> gtFunction(MalArgs args, MalArgs end) {
+
+    check_arguments(end - args != 2, "2", std::to_string(end - args));
+    int num_a = std::static_pointer_cast<AstTokenNumber>(*args++)->value;
+    int num_b = std::static_pointer_cast<AstTokenNumber>(*args)->value;
+
+    return std::shared_ptr<AstTokenBool>(new AstTokenBool(num_a > num_b));
+}
+
+std::shared_ptr<AstToken> gteFunction(MalArgs args, MalArgs end) {
+
+    check_arguments(end - args != 2, "2", std::to_string(end - args));
+    int num_a = std::static_pointer_cast<AstTokenNumber>(*args++)->value;
+    int num_b = std::static_pointer_cast<AstTokenNumber>(*args)->value;
+
+    return std::shared_ptr<AstTokenBool>(new AstTokenBool(num_a >= num_b));
+}
+
+
+
 
