@@ -6,6 +6,7 @@
 #include"Printer.h"
 #include"Validation.h"
 #include"Evaluation.h"
+#include"Core.h"
 
 std::string rep(const std::string& input, MalEnv& repl_env);
 std::shared_ptr<AstToken> READ(const std::string& input);
@@ -20,14 +21,8 @@ int main(int argc, char* argv[]) {
     std::string input;
 
     MalEnv repl_env;
-    repl_env.set("+", std::static_pointer_cast<AstToken>(
-                std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&addFunction))));
-    repl_env.set("-", std::static_pointer_cast<AstToken>(
-                std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&subFunction))));
-    repl_env.set("*", std::static_pointer_cast<AstToken>(
-                std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&mulFunction))));
-    repl_env.set("/", std::static_pointer_cast<AstToken>(
-                std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&divFunction))));
+    start_outer_env(repl_env);
+
     while(readLine.read(prompt, input)) {
 
         std::string out;
@@ -60,6 +55,6 @@ std::shared_ptr<AstToken> EVAL(std::shared_ptr<AstToken> ast, MalEnv& repl_env) 
 }
 
 std::string PRINT(std::shared_ptr<AstToken> ast) {
-    return pr_str(ast);
+    return pr_str(ast, false);
 }
 

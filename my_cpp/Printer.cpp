@@ -1,10 +1,10 @@
 #include"Printer.h"
 
 template<class T>
-void pr_list(std::string& ret, std::shared_ptr<T> ast) {
+void pr_list(std::string& ret, std::shared_ptr<T> ast, bool print_readably) {
 
     for(auto token : ast->list)
-        ret += pr_str(token) + " ";
+        ret += pr_str(token, print_readably) + " ";
 
     // Erase space after the last element of the list
     auto index = std::find(std::rbegin(ret), std::rend(ret), ' ');
@@ -17,11 +17,11 @@ void pr_list(std::string& ret, std::shared_ptr<T> ast) {
 }
 
 template<class T>
-void pr_hash(std::string& ret, std::shared_ptr<T> ast) {
+void pr_hash(std::string& ret, std::shared_ptr<T> ast, bool print_readably) {
 
     for(auto it : ast->map) {
         ret += it.first + " ";
-        ret += pr_str(it.second) + " ";
+        ret += pr_str(it.second, print_readably) + " ";
     }
 
     // Erase space after the last element of the list
@@ -34,7 +34,7 @@ void pr_hash(std::string& ret, std::shared_ptr<T> ast) {
     return;
 }
 
-std::string pr_str(std::shared_ptr<AstToken> ast){
+std::string pr_str(std::shared_ptr<AstToken> ast, bool print_readably){
 
     std::string ret = "";
 
@@ -43,14 +43,14 @@ std::string pr_str(std::shared_ptr<AstToken> ast){
 
             case SYMBOL: {
                 std::shared_ptr<AstTokenSymbol> symbol_ast;
-                symbol_ast = static_pointer_cast<AstTokenSymbol>(ast);
+                symbol_ast = std::static_pointer_cast<AstTokenSymbol>(ast);
                 ret = symbol_ast->name;
                 break;
             }
 
             case NUMBER: {
                 std::shared_ptr<AstTokenNumber> number_ast;
-                number_ast = static_pointer_cast<AstTokenNumber>(ast);
+                number_ast = std::static_pointer_cast<AstTokenNumber>(ast);
                 ret = std::to_string(number_ast->value);
                 break;
             }
@@ -58,10 +58,10 @@ std::string pr_str(std::shared_ptr<AstToken> ast){
             case LIST_H:
             case LIST: {
                 std::shared_ptr<AstTokenList> list_ast;
-                list_ast = static_pointer_cast<AstTokenList>(ast);
+                list_ast = std::static_pointer_cast<AstTokenList>(ast);
 
                 ret = ast->type == LIST ? "(" : "{";
-                pr_list(ret, list_ast);
+                pr_list(ret, list_ast, print_readably);
                 ret += ast->type == LIST ? ")" : "}";
 
                 break;
@@ -69,29 +69,61 @@ std::string pr_str(std::shared_ptr<AstToken> ast){
             case LIST_V:
             case VECTOR: {
                 std::shared_ptr<AstTokenVector> vect_ast;
-                vect_ast = static_pointer_cast<AstTokenVector>(ast);
+                vect_ast = std::static_pointer_cast<AstTokenVector>(ast);
 
                 ret = "[";
-                pr_list(ret, vect_ast);
+                pr_list(ret, vect_ast, print_readably);
                 ret += "]";
 
                 break;
            }
            case HASH_MAP: {
                 std::shared_ptr<AstTokenHashMap> hash_ast;
-                hash_ast = static_pointer_cast<AstTokenHashMap>(ast);
+                hash_ast = std::static_pointer_cast<AstTokenHashMap>(ast);
 
                 ret = "{";
-                pr_hash(ret, hash_ast);
+                pr_hash(ret, hash_ast, print_readably);
                 ret += "}";
 
                 break;
            }
            case BOOL: {
                 std::shared_ptr<AstTokenBool> bool_ast;
-                bool_ast = static_pointer_cast<AstTokenBool>(ast);
+                bool_ast = std::static_pointer_cast<AstTokenBool>(ast);
                 ret = bool_ast->value ? "true" : "false";
 
+                break;
+           }
+           case STRING: {
+
+                std::shared_ptr<AstTokenString> str_ast;
+                str_ast = std::static_pointer_cast<AstTokenString>(ast);
+
+                if(print_readably){
+
+                    std::string readably_str;
+                    for(int i=0; i < (int) str_ast->value.size(); i++) {
+                        switch (str_ast->value[i]) {
+                            case '\\':
+                                readably_str.push_back('\\');
+                                readably_str.push_back('\\');
+                                break;
+                            case '"':
+                                readably_str.push_back('\\');
+                                readably_str.push_back('"');
+                                break;
+                            case '\n':
+                                readably_str.push_back('\\');
+                                readably_str.push_back('n');
+                                break;
+                            default:
+                                readably_str.push_back(str_ast->value[i]);
+                        }
+                    }
+                    ret = readably_str;
+                }else{
+                    ret = str_ast->value;
+                }
                 break;
            }
            case NIL: {

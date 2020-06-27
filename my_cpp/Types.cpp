@@ -25,6 +25,14 @@ AstTokenNumber::AstTokenNumber(int _number)
 AstTokenList::AstTokenList()
 : AstToken(LIST) {};
 
+AstTokenList::AstTokenList(MalArgs init, MalArgs end)
+: AstToken(LIST) {
+    while(init != end) {
+        list.push_back(*init);
+        init++;
+    }
+};
+
 AstTokenVector::AstTokenVector()
 : AstToken(VECTOR) {};
 
@@ -39,6 +47,42 @@ AstTokenBool::AstTokenBool(const std::string& _value)
 AstTokenBool::AstTokenBool(bool _value)
 : AstToken(BOOL)
 , value(_value) {};
+
+AstTokenFunction::AstTokenFunction(MalEnv* _scope, std::shared_ptr<AstToken> _function)
+: AstToken(FUNCTION)
+, scope(_scope)
+, function(_function) {};
+
+AstTokenFunction::~AstTokenFunction() {};
+
+AstTokenString::AstTokenString(std::string _value)
+: AstToken(STRING) {
+
+    for(int i=0; i < (int) _value.length(); i++) {
+        if(_value[i] != '\\') {
+            value.push_back(_value[i]);
+        } else {
+            i++;
+            if(i < (int) _value.length()) {
+                switch (_value[i]) {
+
+                    case 'n':
+                        value.push_back('\n');
+                        break;
+                    case '"':
+                        value.push_back('"');
+                        break;
+                    case '\\':
+                        value.push_back('\\');
+                        break;
+                    default:
+                        value.push_back('\\');
+                        value.push_back(_value[i]);
+                }
+            }
+        }
+    }
+}
 
 AstTokenNil::AstTokenNil()
 : AstToken(NIL) {};

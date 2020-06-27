@@ -1,7 +1,7 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
-#include<string>
+#include<string> 
 #include<vector>
 #include<memory>
 #include<functional>
@@ -11,9 +11,10 @@ using std::static_pointer_cast;
 
 typedef std::vector<std::string> StringVector;
 class EmptyInput : public std::exception {};
+class MalEnv;
 
 enum tokenType { SYMBOL, NUMBER, LIST, LIST_V, LIST_H, VECTOR,
-                HASH_MAP, OPERATOR, BOOL, FUNCTION, NIL };
+                HASH_MAP, OPERATOR, BOOL, FUNCTION, NIL, STRING};
 
 class AstToken {
     public:
@@ -51,6 +52,7 @@ class AstTokenList : public AstToken {
     public:
         std::vector<std::shared_ptr<AstToken>> list;
         AstTokenList();
+        AstTokenList(MalArgs init, MalArgs end);
 };
 
 class AstTokenVector : public AstToken {
@@ -70,6 +72,20 @@ class AstTokenBool : public AstToken {
         bool value;
         AstTokenBool(const std::string& _value);
         AstTokenBool(bool _value);
+};
+
+class AstTokenFunction : public AstToken {
+    public:
+        MalEnv* scope;
+        std::shared_ptr<AstToken> function;
+        AstTokenFunction(MalEnv* _scope, std::shared_ptr<AstToken> _function);
+        ~AstTokenFunction();
+};
+
+class AstTokenString : public AstToken {
+    public:
+        std::string value;
+        AstTokenString(std::string _value);
 };
 
 class AstTokenNil : public AstToken {

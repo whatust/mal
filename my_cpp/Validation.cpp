@@ -1,5 +1,9 @@
 #include"Validation.h"
 
+const char *token_type_str[] = { "SYMBOL", "NUMBER", "LIST", "LIST_V",
+                                    "LIST_H", "VECTOR", "HASH_MAP", "OPERATOR",
+                                    "BOOL", "FUNCTION", "NIL", "STRING"};
+
 void check_list_balance(bool condition, const std::string& expected, const std::string& got) {
 
     if (condition) {
@@ -42,8 +46,6 @@ void check_valid_symbol(bool condition, const std::string& error, const std::str
 
 void check_token(bool condition, const tokenType& token_expected, const tokenType& token_got) {
 
-    const char *token_type_str[] = { "SYMBOL", "NUMBER", "LIST", "LIST_V",
-                                    "LIST_H", "VECTOR", "HASH_MAP", "OPERATOR"};
     if (condition) {
 
         std::string error = "Error: Expected Token type: %s got: %s";
@@ -57,6 +59,20 @@ void check_token(bool condition, const tokenType& token_expected, const tokenTyp
         throw error_message;
     }
     return;
+}
+
+void unimplemented_comparison(const tokenType& token_a, const tokenType& token_b) {
+
+    std::string error = "Error: Unimplemented comparison between %s and %s";
+    std::string str_a(token_type_str[token_a]);
+    std::string str_b(token_type_str[token_b]);
+
+    char* aux_message = new char[error.length() + str_a.length() + str_b.length() + 1];
+
+    sprintf(aux_message, error.c_str(), str_a.c_str(), str_b.c_str());
+    std::string error_message(std::move(aux_message));
+
+    throw error_message;
 }
 
 void check_arguments(bool condition, const std::string& expected, const std::string& got) {

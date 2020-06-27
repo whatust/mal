@@ -7,7 +7,7 @@ static const std::regex NUMBER_REGEX("^[-+]?[0-9]+");
 static const std::regex TOKEN_REGEX[] = {
     std::regex("~@"),                        // Special two characters
     std::regex("[\\[\\]{}()'`~^@]"),         // Special single characters
-    std::regex("\"(?:\\\\.|[^\\\\\"])*\""),  // Balanced and umbalanced strings
+    std::regex("\"(?:\\\\.|[^\\\\\"])*\""),  // Balanced strings
     std::regex("[^\\s\\[\\]{}('\"`,;)]+"),   // Symbols numbers constants
     std::regex(";.*")                        // Comments
 };
@@ -192,6 +192,9 @@ AstTokenPtr read_atom(Reader& reader) {
             break;
         case '@':
             ast = read_quote("deref", reader);
+            break;
+        case '"':
+            ast = new AstTokenString(token);
             break;
         default:
 
