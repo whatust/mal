@@ -196,6 +196,9 @@ AstTokenPtr read_atom(Reader& reader) {
         case '"':
             ast = new AstTokenString(token, true);
             break;
+        case ':':
+            ast = new AstTokenKeyword(token);
+            break;
         default:
 
             std::smatch match;

@@ -51,10 +51,17 @@ std::shared_ptr<AstToken> eval_ast (std::shared_ptr<AstToken> ast, MalEnv& repl_
 
             while (token != std::end(list_ast->list)) {
 
-                std::shared_ptr<AstTokenSymbol> key_token = std::static_pointer_cast<AstTokenSymbol>(*(token++));
-                std::string aux = key_token->name;
+                std::shared_ptr<AstToken> key_token = eval(*(token++), repl_env);
+                std::string key; 
+
+                if(key_token->type == STRING){
+                    key = std::static_pointer_cast<AstTokenString>(key_token)->value;
+                }else{
+                    key = std::static_pointer_cast<AstTokenKeyword>(key_token)->value;
+                }
+
                 hash_ast->map.insert(std::pair<std::string,
-                    std::shared_ptr<AstToken>>(std::move(aux), eval(*(token++), repl_env)));
+                    std::shared_ptr<AstToken>>(std::move(key), eval(*(token++), repl_env)));
             }
 
             ret = std::static_pointer_cast<AstToken>(hash_ast);

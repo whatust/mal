@@ -114,6 +114,11 @@ AstTokenString::AstTokenString(std::string _value, bool clean)
     }
 };
 
+AstTokenKeyword::AstTokenKeyword(std::string _value)
+: AstToken(KEYWORD) {
+    value = _value.replace(0, 1, "\xff");
+};
+
 AstTokenNil::AstTokenNil()
 : AstToken(NIL) {};
 

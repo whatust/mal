@@ -14,7 +14,7 @@ class EmptyInput : public std::exception {};
 class MalEnv;
 
 enum tokenType { SYMBOL, NUMBER, LIST, LIST_V, LIST_H, VECTOR,
-                HASH_MAP, OPERATOR, BOOL, FUNCTION, NIL, STRING};
+                HASH_MAP, OPERATOR, BOOL, FUNCTION, NIL, STRING, KEYWORD};
 
 class AstToken {
     public:
@@ -90,6 +90,12 @@ class AstTokenString : public AstToken {
         std::string value;
         AstTokenString(std::string _value);
         AstTokenString(std::string _value, bool clean);
+};
+
+class AstTokenKeyword : public AstToken {
+    public:
+        std::string value;
+        AstTokenKeyword(std::string _value);
 };
 
 class AstTokenNil : public AstToken {

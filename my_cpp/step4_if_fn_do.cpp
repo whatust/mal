@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
 
     MalEnv repl_env;
     start_outer_env(repl_env);
+    rep(std::string("(def! not(fn* (a) (if a false true)))"), repl_env);
 
      while(readLine.read(prompt, input)) {
 

@@ -103,6 +103,13 @@ bool equal(std::shared_ptr<AstToken> a, std::shared_ptr<AstToken> b) {
 
         return string_a.compare(string_b) == 0;
 
+    }else if(a->type == KEYWORD && b->type == KEYWORD) {
+
+        std::string keyword_a = std::static_pointer_cast<AstTokenKeyword>(a)->value;
+        std::string keyword_b = std::static_pointer_cast<AstTokenKeyword>(b)->value;
+
+        return keyword_a.compare(keyword_b) == 0;
+
     }else if((a->type == LIST || a->type == VECTOR) && (b->type == LIST || b->type == VECTOR)) {
 
         std::shared_ptr<AstTokenList>list_a;

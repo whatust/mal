@@ -20,7 +20,11 @@ template<class T>
 void pr_hash(std::string& ret, std::shared_ptr<T> ast, bool print_readably) {
 
     for(auto it : ast->map) {
-        ret += it.first + " ";
+        if(it.first[0] == '\xff') {
+            ret += ":" + it.first.substr(1, it.first.length()-1) + " ";
+        } else {
+            ret += "\"" + it.first + "\" ";
+        }
         ret += pr_str(it.second, print_readably) + " ";
     }
 
@@ -132,6 +136,12 @@ std::string pr_str(std::shared_ptr<AstToken> ast, bool print_readably){
            }
            case FUNCTION: {
                 ret = "#<function>";
+                break;
+           }
+           case KEYWORD: {
+                std::shared_ptr<AstTokenKeyword> key_ast;
+                key_ast = std::static_pointer_cast<AstTokenKeyword>(ast);
+                ret = key_ast->value.replace(0, 1, ":");
                 break;
            }
            case OPERATOR: {

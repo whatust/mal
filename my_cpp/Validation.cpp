@@ -2,7 +2,7 @@
 
 const char *token_type_str[] = { "SYMBOL", "NUMBER", "LIST", "LIST_V",
                                     "LIST_H", "VECTOR", "HASH_MAP", "OPERATOR",
-                                    "BOOL", "FUNCTION", "NIL", "STRING"};
+                                    "BOOL", "FUNCTION", "NIL", "STRING", "KEYWORD"};
 
 void check_list_balance(bool condition, const std::string& expected, const std::string& got) {
 
