@@ -12,7 +12,7 @@ std::shared_ptr<AstToken> eval_ast (std::shared_ptr<AstToken> ast, MalEnv& repl_
             std::string symbol;
             std::shared_ptr<AstTokenSymbol> symbol_ast;
 
-            symbol_ast = static_pointer_cast<AstTokenSymbol> (ast);
+            symbol_ast = std::static_pointer_cast<AstTokenSymbol> (ast);
             symbol = symbol_ast->name;
 
             ret = repl_env.get(symbol);
@@ -20,7 +20,7 @@ std::shared_ptr<AstToken> eval_ast (std::shared_ptr<AstToken> ast, MalEnv& repl_
         }
         case LIST: {
             std::shared_ptr<AstTokenList> list_ast;
-            list_ast = static_pointer_cast<AstTokenList>(ast);
+            list_ast = std::static_pointer_cast<AstTokenList>(ast);
             std::shared_ptr<AstTokenList> new_list_ast(new AstTokenList());
 
             for (auto token : list_ast->list) {
@@ -31,7 +31,7 @@ std::shared_ptr<AstToken> eval_ast (std::shared_ptr<AstToken> ast, MalEnv& repl_
         }
         case LIST_V: {
             std::shared_ptr<AstTokenList> list_ast;
-            list_ast = static_pointer_cast<AstTokenList>(ast);
+            list_ast = std::static_pointer_cast<AstTokenList>(ast);
             std::shared_ptr<AstTokenVector> vect_ast(new AstTokenVector);
 
             for (auto token : list_ast->list) {
@@ -42,7 +42,7 @@ std::shared_ptr<AstToken> eval_ast (std::shared_ptr<AstToken> ast, MalEnv& repl_
         }
         case LIST_H: {
             std::shared_ptr<AstTokenList> list_ast;
-            list_ast = static_pointer_cast<AstTokenList>(ast);
+            list_ast = std::static_pointer_cast<AstTokenList>(ast);
             std::shared_ptr<AstTokenHashMap> hash_ast(new AstTokenHashMap);
 
             auto token=std::begin(list_ast->list);
@@ -156,7 +156,7 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, MalEnv& repl_env) 
                             new AstTokenFunction(&repl_env, list_ast->list[1], list_ast->list[2])));
                 //std::cerr << "function" <<std::endl;
             } else {
-                list_ast = static_pointer_cast<AstTokenList> (eval_ast(ast, repl_env));
+                list_ast = std::static_pointer_cast<AstTokenList> (eval_ast(ast, repl_env));
 
                 if (list_ast->list.empty()) {
                     ret = ast;

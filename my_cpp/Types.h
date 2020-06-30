@@ -1,20 +1,16 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
-#include<string> 
-#include<vector>
-#include<memory>
 #include<functional>
 #include<iostream>
+#include<memory>
+#include<string> 
+#include<vector>
 
-using std::static_pointer_cast;
-
-typedef std::vector<std::string> StringVector;
-class EmptyInput : public std::exception {};
 class MalEnv;
-
+typedef std::vector<std::string> StringVector;
 enum tokenType { SYMBOL, NUMBER, LIST, LIST_V, LIST_H, VECTOR,
-                HASH_MAP, OPERATOR, BOOL, FUNCTION, NIL, STRING, KEYWORD};
+                HASH_MAP, OPERATOR, BOOL, FUNCTION, NIL, STRING, KEYWORD };
 
 class AstToken {
     public:
@@ -25,6 +21,8 @@ class AstToken {
 typedef AstToken* AstTokenPtr;
 typedef std::vector<std::shared_ptr<AstToken>>::const_iterator MalArgs;
 typedef std::function<std::shared_ptr<AstToken>(MalArgs, MalArgs)> MalFunction;
+
+class EmptyInput : public std::exception {};
 
 class AstTokenSymbol : public AstToken {
 
