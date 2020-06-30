@@ -77,8 +77,11 @@ class AstTokenBool : public AstToken {
 class AstTokenFunction : public AstToken {
     public:
         MalEnv* scope;
+        std::string larg;
+        std::vector<std::string> params;
         std::shared_ptr<AstToken> function;
-        AstTokenFunction(MalEnv* _scope, std::shared_ptr<AstToken> _function);
+        AstTokenFunction(MalEnv* _scope, std::shared_ptr<AstToken> _params,
+                                    std::shared_ptr<AstToken> _function);
         ~AstTokenFunction();
 };
 
@@ -86,6 +89,7 @@ class AstTokenString : public AstToken {
     public:
         std::string value;
         AstTokenString(std::string _value);
+        AstTokenString(std::string _value, bool clean);
 };
 
 class AstTokenNil : public AstToken {

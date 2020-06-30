@@ -48,17 +48,47 @@ AstTokenBool::AstTokenBool(bool _value)
 : AstToken(BOOL)
 , value(_value) {};
 
-AstTokenFunction::AstTokenFunction(MalEnv* _scope, std::shared_ptr<AstToken> _function)
+AstTokenFunction::AstTokenFunction(MalEnv* _scope, std::shared_ptr<AstToken>_params,
+                                            std::shared_ptr<AstToken> _function)
 : AstToken(FUNCTION)
 , scope(_scope)
-, function(_function) {};
+, function(_function) {
 
-AstTokenFunction::~AstTokenFunction() {};
+    bool next_args = false;
+    std::shared_ptr<AstTokenList> list_ast;
+    list_ast = std::static_pointer_cast<AstTokenList>(_params);
+
+    for(auto key : list_ast->list) {
+
+        std::shared_ptr<AstTokenSymbol> symbol;
+        symbol = std::static_pointer_cast<AstTokenSymbol>(key);
+
+        if(next_args){
+            larg = symbol->name;
+            next_args = false;
+        }
+
+        if(symbol->name.compare("&") == 0 && larg.empty()){
+            next_args = true;
+        }else{
+            params.push_back(symbol->name);
+        }
+    }
+
+};
+
+AstTokenFunction::~AstTokenFunction() {
+};
+
 
 AstTokenString::AstTokenString(std::string _value)
+: AstToken(STRING)
+, value(_value) {};
+
+AstTokenString::AstTokenString(std::string _value, bool clean)
 : AstToken(STRING) {
 
-    for(int i=0; i < (int) _value.length(); i++) {
+    for(int i=1; i < (int) _value.length()-1; i++) {
         if(_value[i] != '\\') {
             value.push_back(_value[i]);
         } else {
@@ -82,7 +112,7 @@ AstTokenString::AstTokenString(std::string _value)
             }
         }
     }
-}
+};
 
 AstTokenNil::AstTokenNil()
 : AstToken(NIL) {};

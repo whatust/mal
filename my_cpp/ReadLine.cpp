@@ -12,7 +12,7 @@ ReadLine::ReadLine(const std::string& cache_folder)
         fs::create_directory(tilde_expand(cache_folder.c_str()));
         read_history(hist_path.c_str());
         write_history(hist_path.c_str());
-        stifle_history(10);
+        stifle_history(1000);
 }
 
 ReadLine::~ReadLine() {

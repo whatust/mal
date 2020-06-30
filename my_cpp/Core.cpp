@@ -193,7 +193,7 @@ std::shared_ptr<AstToken> listqOperator(MalArgs args, MalArgs end) {
 
 std::shared_ptr<AstToken> emptyOperator(MalArgs args, MalArgs end) {
 
-    check_token((*args)->type != LIST && (*args)->type != LIST_V, LIST,
+    check_token((*args)->type != LIST && (*args)->type != VECTOR, LIST,
             (*args)->type);
     std::shared_ptr<AstTokenList> list_ast;
     list_ast = std::static_pointer_cast<AstTokenList>(*args);
@@ -205,7 +205,7 @@ std::shared_ptr<AstToken> emptyOperator(MalArgs args, MalArgs end) {
 
 std::shared_ptr<AstToken> countOperator(MalArgs args, MalArgs end) {
 
-    check_token((*args)->type != LIST && (*args)->type != LIST_V && (*args)->type != NIL,
+    check_token((*args)->type != LIST && (*args)->type != VECTOR && (*args)->type != NIL,
             LIST, (*args)->type);
 
     if((*args)->type == NIL)
@@ -230,7 +230,7 @@ std::shared_ptr<AstToken> prnOperator(MalArgs args, MalArgs end) {
         results += pr_str(*args++, true);
     }
 
-    std::cout << results << std::endl;
+    std::cout << results << "\n";
 
     return std::static_pointer_cast<AstToken>(std::shared_ptr<AstTokenNil>(new AstTokenNil()));
 }
@@ -248,13 +248,24 @@ std::shared_ptr<AstToken> strOperator(MalArgs args, MalArgs end) {
 std::shared_ptr<AstToken> prstrOperator(MalArgs args, MalArgs end) {
 
     std::string results;
+    std::string ret;
+    std::shared_ptr<AstToken> node;
 
-    if(args != end)
-        results = pr_str(*args++, true);
+    if(args == end)
+        return std::static_pointer_cast<AstToken>(std::shared_ptr<AstTokenString>(new AstTokenString("")));
+
+    node = *args++;
+    ret = pr_str(node, true);
+
+    results += ret;
 
     while(args != end) {
+
+        node = *args++;
+        ret =  pr_str(node, true);
+
         results += " ";
-        results += pr_str(*args++, true);
+        results += ret;
     }
 
     return std::static_pointer_cast<AstToken>(std::shared_ptr<AstTokenString>(new AstTokenString(results)));
@@ -265,11 +276,16 @@ std::shared_ptr<AstToken> printlnOperator(MalArgs args, MalArgs end) {
 
     std::string results;
 
-    while(args != end) {
-        results += pr_str(*args++, false);
+    if(args != end) {
+        results = pr_str(*args++, false);
+
+        while(args != end) {
+            results += " ";
+            results += pr_str(*args++, false);
+        }
     }
 
-    std::cout << results;
+    std::cout << results << std::endl;;
 
     return std::static_pointer_cast<AstToken>(std::shared_ptr<AstTokenNil>(new AstTokenNil()));
 }

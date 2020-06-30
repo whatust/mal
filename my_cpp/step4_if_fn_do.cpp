@@ -56,6 +56,6 @@ std::shared_ptr<AstToken> EVAL(std::shared_ptr<AstToken> ast, MalEnv& repl_env) 
 }
 
 std::string PRINT(std::shared_ptr<AstToken> ast) {
-    return pr_str(ast, false);
+    return pr_str(ast, true);
 }
 

@@ -194,7 +194,7 @@ AstTokenPtr read_atom(Reader& reader) {
             ast = read_quote("deref", reader);
             break;
         case '"':
-            ast = new AstTokenString(token);
+            ast = new AstTokenString(token, true);
             break;
         default:
 

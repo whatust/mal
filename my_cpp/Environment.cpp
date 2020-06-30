@@ -1,31 +1,5 @@
 #include "Environment.h"
 
-MalEnv::MalEnv(MalEnv* _outer, std::shared_ptr<AstToken> _param) : outer(_outer) {
-
-    check_token(_param->type != LIST, LIST, _param->type);
-
-    bool next_args = false;
-    std::shared_ptr<AstTokenList> list_ast;
-    list_ast = std::static_pointer_cast<AstTokenList>(_param);
-
-    for(auto key : list_ast->list) {
-
-        std::shared_ptr<AstTokenSymbol> symbol;
-        symbol = std::static_pointer_cast<AstTokenSymbol>(key);
-
-        if(next_args){
-            largs = symbol->name;
-            next_args = false;
-        }
-
-        if(symbol->name.compare("&") == 0 && largs.empty()){
-            next_args = true;
-        }else{
-            params.push_back(symbol->name);
-        }
-    }
-}
-
 std::shared_ptr<AstToken>
 MalEnv::find(const std::string& key) {
 
@@ -54,7 +28,7 @@ MalEnv::get(const std::string& key) {
 }
 
 void
-MalEnv::set_bindings(MalArgs init, MalArgs end) {
+MalEnv::set_bindings(const std::vector<std::string>& params, std::string largs, MalArgs init, MalArgs end) {
 
     check_arguments(end - init < (int) params.size() - (int) !largs.empty(),
             std::to_string(params.size() - (int) !largs.empty()), std::to_string(end - init));
@@ -68,7 +42,6 @@ MalEnv::set_bindings(MalArgs init, MalArgs end) {
             bindings[*it] = *init++;
         }
     }
-
     return;
 }
 
@@ -84,16 +57,18 @@ MalEnv::get_outer() {
 }
 
 void MalEnv::print() {
-    std::cout << "Printing Env" << std::endl;
     std::cout << "data:" << std::endl;
     for(auto entry : data) {
-        std::cout << "key: " << entry.first << std::endl;
+        std::cerr << "key: " << entry.first << std::endl;
     }
 
     std::cout << "bindings:" << std::endl;
     for(auto entry : bindings) {
         std::cout << "key: " << entry.first << std::endl;
     }
+
+    if(outer)
+        outer->print();
 
     return;
 }

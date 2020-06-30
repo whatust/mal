@@ -3,6 +3,9 @@
 std::shared_ptr<AstToken> eval_ast (std::shared_ptr<AstToken> ast, MalEnv& repl_env) {
 
     std::shared_ptr<AstToken> ret;
+    //std::cout << "Printing Env" << std::endl;
+    //repl_env.print();
+    //std::cerr << "=============" << std::endl;
 
     switch (ast->type) {
         case SYMBOL: {
@@ -139,11 +142,12 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, MalEnv& repl_env) 
                     std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "fn*") {
 
                 check_arguments(list_ast->list.size() < 3, "2", std::to_string(list_ast->list.size() - 1));
+                check_token(list_ast->list[1]->type != LIST && list_ast->list[1]->type != LIST_V,
+                                                                LIST, list_ast->list[1]->type);
 
-                MalEnv *new_repl_env;
-                new_repl_env = new MalEnv(&repl_env, list_ast->list[1]);
                 ret = std::static_pointer_cast<AstToken>(std::shared_ptr<AstTokenFunction>(
-                            new AstTokenFunction(new_repl_env, list_ast->list[2])));
+                            new AstTokenFunction(&repl_env, list_ast->list[1], list_ast->list[2])));
+                //std::cerr << "function" <<std::endl;
             } else {
                 list_ast = static_pointer_cast<AstTokenList> (eval_ast(ast, repl_env));
 
@@ -160,10 +164,13 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, MalEnv& repl_env) 
                 } else if(list_ast->list[0]->type == FUNCTION) {
                     std::shared_ptr<AstTokenFunction> funToken;
 
+
                     funToken = std::static_pointer_cast<AstTokenFunction>(eval(list_ast->list[0], repl_env));
-                    funToken->scope->set_bindings(++(std::cbegin(list_ast->list)), std::cend(list_ast->list));
-                    //funToken->scope->print();
-                    ret = eval(funToken->function, (*funToken->scope));
+
+                    MalEnv* new_repl_env = new MalEnv(funToken->scope);
+                    new_repl_env->set_bindings(funToken->params, funToken->larg,
+                        ++(std::cbegin(list_ast->list)), std::cend(list_ast->list));
+                    ret = eval(funToken->function, *new_repl_env);
                 } else {
                     ret = ast;
                 }

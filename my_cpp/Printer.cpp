@@ -98,10 +98,9 @@ std::string pr_str(std::shared_ptr<AstToken> ast, bool print_readably){
 
                 std::shared_ptr<AstTokenString> str_ast;
                 str_ast = std::static_pointer_cast<AstTokenString>(ast);
+                std::string readably_str;
 
                 if(print_readably){
-
-                    std::string readably_str;
                     for(int i=0; i < (int) str_ast->value.size(); i++) {
                         switch (str_ast->value[i]) {
                             case '\\':
@@ -120,10 +119,11 @@ std::string pr_str(std::shared_ptr<AstToken> ast, bool print_readably){
                                 readably_str.push_back(str_ast->value[i]);
                         }
                     }
-                    ret = readably_str;
+                    readably_str = "\"" + readably_str + "\"";
                 }else{
-                    ret = str_ast->value;
+                    readably_str = str_ast->value;
                 }
+                ret = readably_str;
                 break;
            }
            case NIL: {
@@ -135,7 +135,7 @@ std::string pr_str(std::shared_ptr<AstToken> ast, bool print_readably){
                 break;
            }
            case OPERATOR: {
-                throw "Unexpected Operator";
+                throw std::string("Unexpected Operator");
            }
         }
     }
