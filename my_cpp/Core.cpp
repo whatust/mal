@@ -36,6 +36,8 @@ void start_outer_env(MalEnv & repl_env) {
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&prstrOperator))));
     repl_env.set("println", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&printlnOperator))));
+    repl_env.set("read-string", std::static_pointer_cast<AstToken>(
+                std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&readstrOperator))));
     return;
 }
 
@@ -54,8 +56,7 @@ std::shared_ptr<AstToken> subOperator(MalArgs args, MalArgs end) {
     int num_a = std::static_pointer_cast<AstTokenNumber>(*args++)->value;
     int num_b = std::static_pointer_cast<AstTokenNumber>(*args)->value;
 
-    return std::shared_ptr<AstTokenNumber>(new AstTokenNumber(num_a - num_b));
-}
+    return std::shared_ptr<AstTokenNumber>(new AstTokenNumber(num_a - num_b)); }
 
 std::shared_ptr<AstToken> mulOperator(MalArgs args, MalArgs end) {
 
@@ -296,3 +297,12 @@ std::shared_ptr<AstToken> printlnOperator(MalArgs args, MalArgs end) {
 
     return std::static_pointer_cast<AstToken>(std::shared_ptr<AstTokenNil>(new AstTokenNil()));
 }
+
+std::shared_ptr<AstToken> readstrOperator(MalArgs args, MalArgs end) {
+
+    check_token((*args)->type != STRING, STRING, (*args)->type);
+    std::string str = std::static_pointer_cast<AstTokenString>(*args)->value;
+
+    return read_str(str);
+}
+
