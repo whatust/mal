@@ -52,7 +52,7 @@ std::shared_ptr<AstToken> eval_ast (std::shared_ptr<AstToken> ast, MalEnv& repl_
             while (token != std::end(list_ast->list)) {
 
                 std::shared_ptr<AstToken> key_token = eval(*(token++), repl_env);
-                std::string key; 
+                std::string key;
 
                 if(key_token->type == STRING){
                     key = std::static_pointer_cast<AstTokenString>(key_token)->value;
@@ -76,117 +76,136 @@ std::shared_ptr<AstToken> eval_ast (std::shared_ptr<AstToken> ast, MalEnv& repl_
 
 std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, MalEnv& repl_env) {
 
+    bool loop = true;
     std::shared_ptr<AstToken> ret;
+    std::shared_ptr<AstToken> token;
+    MalEnv* env = &repl_env;
 
-    switch (ast->type) {
-        case LIST: {
+    token = ast;
 
-            std::shared_ptr<AstTokenList> list_ast = std::static_pointer_cast<AstTokenList>(ast);
+    while(loop){
+        switch (token->type) {
+            case LIST: {
 
-            if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
-                std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "def!"){
+                std::shared_ptr<AstTokenList> list_ast = std::static_pointer_cast<AstTokenList>(token);
 
-                check_arguments(list_ast->list.size() - 1 != 2, "2", std::to_string(list_ast->list.size() - 1));
-                check_token(list_ast->list[1]->type != SYMBOL, SYMBOL, list_ast->list[1]->type);
+                if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
+                    std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "def!"){
 
-                std::string key_token = std::static_pointer_cast<AstTokenSymbol>(list_ast->list[1])->name;
-                std::shared_ptr<AstToken> value = eval(list_ast->list[2], repl_env);
-                repl_env.set(key_token, value);
+                    check_arguments(list_ast->list.size() - 1 != 2, "2", std::to_string(list_ast->list.size() - 1));
+                    check_token(list_ast->list[1]->type != SYMBOL, SYMBOL, list_ast->list[1]->type);
 
-                ret = value;
-            } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
-                std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "let*"){
+                    std::string key_token = std::static_pointer_cast<AstTokenSymbol>(list_ast->list[1])->name;
+                    std::shared_ptr<AstToken> value = eval(list_ast->list[2], *env);
+                    env->set(key_token, value);
 
-                check_arguments(list_ast->list.size() - 1 != 2, "2", std::to_string(list_ast->list.size() - 1));
-                check_token(list_ast->list[1]->type != LIST && list_ast->list[1]->type != LIST_V,
-                                                                LIST, list_ast->list[1]->type);
+                    ret = value;
+                    loop = false;
+                } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
+                    std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "let*"){
 
-                MalEnv new_repl_env(&repl_env);
-                std::shared_ptr<AstTokenList> bindings;
+                    check_arguments(list_ast->list.size() - 1 != 2, "2", std::to_string(list_ast->list.size() - 1));
+                    check_token(list_ast->list[1]->type != LIST && list_ast->list[1]->type != LIST_V,
+                                                                    LIST, list_ast->list[1]->type);
 
-                bindings = std::static_pointer_cast<AstTokenList>(list_ast->list[1]);
-                check_map(bindings->list.size() % 2);
+                    MalEnv* new_repl_env = new MalEnv(env);
+                    std::shared_ptr<AstTokenList> bindings;
 
-                for(auto it=std::begin(bindings->list); it != std::end(bindings->list);){
+                    bindings = std::static_pointer_cast<AstTokenList>(list_ast->list[1]);
+                    check_map(bindings->list.size() % 2);
 
-                    check_token((*it)->type != SYMBOL, SYMBOL, (*it)->type);
-                    std::string key = std::static_pointer_cast<AstTokenSymbol>(*(it++))->name;
-                    new_repl_env.set(key, eval(*(it++), new_repl_env));
-                }
-                ret = eval(list_ast->list[2], new_repl_env);
-            } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
-                    std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "do") {
+                    for(auto it=std::begin(bindings->list); it != std::end(bindings->list);){
 
-                check_arguments(list_ast->list.size() < 2, "1", std::to_string(list_ast->list.size() - 1));
-
-                for(int i=1; i < (int) list_ast->list.size() - 1; i++){
-                    eval(list_ast->list[i], repl_env);
-                }
-
-                ret = eval(list_ast->list.back(), repl_env);
-
-            } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
-                    std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "if") {
-
-                check_arguments(list_ast->list.size() < 3, "2", std::to_string(list_ast->list.size() - 1));
-
-                std::shared_ptr<AstToken> condition;
-
-                condition = eval(list_ast->list[1], repl_env);
-
-                if(condition->type == NIL || (condition->type == BOOL &&
-                    !std::static_pointer_cast<AstTokenBool>(condition)->value)) {
-
-                    if (list_ast->list.size() < 4)
-                        ret = std::shared_ptr<AstToken>(new AstTokenNil());
-                    else
-                        ret = eval(list_ast->list[3], repl_env);
-
-                } else {
-                    ret = eval(list_ast->list[2], repl_env);
-                }
-            } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
-                    std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "fn*") {
-
-                check_arguments(list_ast->list.size() < 3, "2", std::to_string(list_ast->list.size() - 1));
-                check_token(list_ast->list[1]->type != LIST && list_ast->list[1]->type != LIST_V,
-                                                                LIST, list_ast->list[1]->type);
-
-                ret = std::static_pointer_cast<AstToken>(std::shared_ptr<AstTokenFunction>(
-                            new AstTokenFunction(&repl_env, list_ast->list[1], list_ast->list[2])));
-                //std::cerr << "function" <<std::endl;
-            } else {
-                list_ast = std::static_pointer_cast<AstTokenList> (eval_ast(ast, repl_env));
-
-                if (list_ast->list.empty()) {
-                    ret = ast;
+                        check_token((*it)->type != SYMBOL, SYMBOL, (*it)->type);
+                        std::string key = std::static_pointer_cast<AstTokenSymbol>(*(it++))->name;
+                        new_repl_env->set(key, eval(*(it++), *new_repl_env));
+                    }
+                    //ret = eval(list_ast->list[2], new_repl_env);
+                    token = list_ast->list[2];
+                    env = new_repl_env;
                     break;
-                }
 
-                if(list_ast->list[0]->type == OPERATOR) {
-                    std::shared_ptr<AstTokenOperator> opToken;
+                } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
+                        std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "do") {
 
-                    opToken = std::static_pointer_cast<AstTokenOperator>(eval(list_ast->list[0], repl_env));
-                    ret = (*opToken)(++(std::cbegin(list_ast->list)), std::cend(list_ast->list));
-                } else if(list_ast->list[0]->type == FUNCTION) {
-                    std::shared_ptr<AstTokenFunction> funToken;
+                    check_arguments(list_ast->list.size() < 2, "1", std::to_string(list_ast->list.size() - 1));
 
+                    for(int i=1; i < (int) list_ast->list.size() - 1; i++){
+                        eval(list_ast->list[i], *env);
+                    }
 
-                    funToken = std::static_pointer_cast<AstTokenFunction>(eval(list_ast->list[0], repl_env));
+                    //ret = eval(list_ast->list.back(), repl_env);
+                    token = list_ast->list.back();
+                    break;
 
-                    MalEnv* new_repl_env = new MalEnv(funToken->scope);
-                    new_repl_env->set_bindings(funToken->params, funToken->larg,
-                        ++(std::cbegin(list_ast->list)), std::cend(list_ast->list));
-                    ret = eval(funToken->function, *new_repl_env);
+                } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
+                        std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "if") {
+
+                    check_arguments(list_ast->list.size() < 3, "2", std::to_string(list_ast->list.size() - 1));
+
+                    std::shared_ptr<AstToken> condition;
+
+                    condition = eval(list_ast->list[1], *env);
+
+                    if(condition->type == NIL || (condition->type == BOOL &&
+                        !std::static_pointer_cast<AstTokenBool>(condition)->value)) {
+
+                        if (list_ast->list.size() < 4){
+                            ret = std::shared_ptr<AstToken>(new AstTokenNil());
+                        } else {
+                            token = list_ast->list[3];
+                            break;
+                        }
+                    } else {
+                        token = list_ast->list[2];
+                        break;
+                    }
+                    loop = false;
+
+                } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
+                        std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "fn*") {
+
+                    check_arguments(list_ast->list.size() < 3, "2", std::to_string(list_ast->list.size() - 1));
+                    check_token(list_ast->list[1]->type != LIST && list_ast->list[1]->type != LIST_V,
+                                                                    LIST, list_ast->list[1]->type);
+
+                    ret = std::static_pointer_cast<AstToken>(std::shared_ptr<AstTokenFunction>(
+                                new AstTokenFunction(env, list_ast->list[1], list_ast->list[2])));
+                    loop = false;
                 } else {
-                    ret = ast;
-                }
-            }
+                    list_ast = std::static_pointer_cast<AstTokenList> (eval_ast(token, *env));
 
-            break;
+                    if (list_ast->list.empty()) {
+                        ret = token;
+                        loop = false;
+                        break;
+                    }
+
+                    if(list_ast->list[0]->type == OPERATOR) {
+                        std::shared_ptr<AstTokenOperator> opToken;
+
+                        opToken = std::static_pointer_cast<AstTokenOperator>(eval(list_ast->list[0], *env));
+                        ret = (*opToken)(++(std::cbegin(list_ast->list)), std::cend(list_ast->list));
+                    } else if(list_ast->list[0]->type == FUNCTION) {
+                        std::shared_ptr<AstTokenFunction> funToken;
+
+                        funToken = std::static_pointer_cast<AstTokenFunction>(eval(list_ast->list[0], *env));
+
+                        MalEnv* new_repl_env = new MalEnv(funToken->scope);
+                        new_repl_env->set_bindings(funToken->params, funToken->larg,
+                            ++(std::cbegin(list_ast->list)), std::cend(list_ast->list));
+                        ret = eval(funToken->function, *new_repl_env);
+                    } else {
+                        ret = token;
+                    }
+                }
+                loop = false;
+                break;
+            }
+            default:
+                ret = eval_ast(token, *env);
+                loop = false;
         }
-        default:
-            ret = eval_ast(ast, repl_env);
     }
     return ret;
 }
