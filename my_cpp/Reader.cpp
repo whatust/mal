@@ -2,14 +2,14 @@
 
 using std::regex_constants::match_continuous;
 
-static const std::regex WHITESPACES_REGEX("[\\s,]+");
+static const std::regex WHITESPACES_REGEX("^[\\s,]+|^;.*");
 static const std::regex NUMBER_REGEX("^[-+]?[0-9]+");
 static const std::regex TOKEN_REGEX[] = {
     std::regex("~@"),                        // Special two characters
     std::regex("[\\[\\]{}()'`~^@]"),         // Special single characters
     std::regex("\"(?:\\\\.|[^\\\\\"])*\""),  // Balanced strings
     std::regex("[^\\s\\[\\]{}('\"`,;)]+"),   // Symbols numbers constants
-    std::regex(";.*")                        // Comments
+    //std::regex(";.*")                        // Comments
 };
 
 Reader::Reader(StringVector&& _tokens)
@@ -50,7 +50,7 @@ StringVector tokenize(const std::string& input) {
         auto flag = match_continuous;
 
         // Remove whitespaces
-        if(std::regex_search(iter, std::end(input), match, WHITESPACES_REGEX, flag)) {
+        while(std::regex_search(iter, std::end(input), match, WHITESPACES_REGEX, flag)) {
             if(match.position(0) == 0 && match.length(0) > 0) {
                 iter += match.length(0);
             }
@@ -73,6 +73,13 @@ StringVector tokenize(const std::string& input) {
             iter += match.length(0);
             match_found = true;
         }
+
+        /*std::cout << "+";
+        for(auto it=iter; it != std::end(input); it++){
+            std::cout << *it;
+        }
+        std::cout << "+";
+        std::cout << std::endl;*/
 
         // Check
         check_list_balance(!match_found, "\"", "EOF");
