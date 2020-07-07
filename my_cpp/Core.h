@@ -1,6 +1,8 @@
 #ifndef _CORE_H_
 #define _CORE_H_
 
+#include<fstream>
+
 #include"Types.h"
 #include"Validation.h"
 #include"Environment.h"
@@ -30,5 +32,6 @@ std::shared_ptr<AstToken> prstrOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> printlnOperator(MalArgs args, MalArgs end);
 
 std::shared_ptr<AstToken> readstrOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> slurpOperator(MalArgs args, MalArgs end);
 
 #endif //_CORE_H_

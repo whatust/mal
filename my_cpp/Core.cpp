@@ -38,6 +38,8 @@ void start_outer_env(MalEnv & repl_env) {
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&printlnOperator))));
     repl_env.set("read-string", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&readstrOperator))));
+    repl_env.set("slurp", std::static_pointer_cast<AstToken>(
+                std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&slurpOperator))));
     return;
 }
 
@@ -304,5 +306,19 @@ std::shared_ptr<AstToken> readstrOperator(MalArgs args, MalArgs end) {
     std::string str = std::static_pointer_cast<AstTokenString>(*args)->value;
 
     return read_str(str);
+}
+
+std::shared_ptr<AstToken> slurpOperator(MalArgs args, MalArgs end) {
+
+    check_token((*args)->type != STRING, STRING, (*args)->type);
+    std::string filename = std::static_pointer_cast<AstTokenString>(*args)->value;
+
+    std::ifstream filestream;
+    filestream.open(filename);
+
+    std::string str((std::istreambuf_iterator<char>(filestream)),
+                    (std::istreambuf_iterator<char>()));
+
+    return std::static_pointer_cast<AstToken>(std::shared_ptr<AstTokenString>(new AstTokenString(str)));
 }
 
