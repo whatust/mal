@@ -8,6 +8,7 @@
 #include"Environment.h"
 #include"Printer.h"
 #include"Reader.h"
+#include"Evaluation.h"
 
 void start_outer_env(MalEnv & repl_env);
 std::shared_ptr<AstToken> addOperator(MalArgs args, MalArgs end);
@@ -33,5 +34,6 @@ std::shared_ptr<AstToken> printlnOperator(MalArgs args, MalArgs end);
 
 std::shared_ptr<AstToken> readstrOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> slurpOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> evalOperator(MalArgs args, MalArgs end);
 
 #endif //_CORE_H_

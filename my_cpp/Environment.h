@@ -23,4 +23,6 @@ public:
     void print();
 };
 
+extern MalEnv* outer_env;
+
 #endif //ENVIRONMENT_H_

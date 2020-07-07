@@ -1,6 +1,6 @@
 #include"Core.h"
 
-void start_outer_env(MalEnv & repl_env) {
+void start_outer_env(MalEnv& repl_env) {
 
    repl_env.set("+", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&addOperator))));
@@ -40,6 +40,9 @@ void start_outer_env(MalEnv & repl_env) {
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&readstrOperator))));
     repl_env.set("slurp", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&slurpOperator))));
+    repl_env.set("eval", std::static_pointer_cast<AstToken>(
+                std::shared_ptr<AstTokenOperator>(new AstTokenOperator(&evalOperator))));
+    outer_env = &repl_env;
     return;
 }
 
@@ -320,5 +323,12 @@ std::shared_ptr<AstToken> slurpOperator(MalArgs args, MalArgs end) {
                     (std::istreambuf_iterator<char>()));
 
     return std::static_pointer_cast<AstToken>(std::shared_ptr<AstTokenString>(new AstTokenString(str)));
+}
+
+std::shared_ptr<AstToken> evalOperator(MalArgs args, MalArgs end) {
+
+    check_arguments(end - args != 1, std::to_string(1), std::to_string(end - args));
+
+    return eval((*args), *outer_env);
 }
 
