@@ -101,6 +101,7 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, MalEnv& repl_env) 
 
                     ret = value;
                     loop = false;
+
                 } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
                     std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "let*"){
 

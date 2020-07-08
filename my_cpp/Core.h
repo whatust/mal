@@ -36,4 +36,10 @@ std::shared_ptr<AstToken> readstrOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> slurpOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> evalOperator(MalArgs args, MalArgs end);
 
+std::shared_ptr<AstToken> atomOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> atomqOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> derefOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> resetOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> swapOperator(MalArgs args, MalArgs end);
+
 #endif //_CORE_H_

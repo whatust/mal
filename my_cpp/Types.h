@@ -4,13 +4,14 @@
 #include<functional>
 #include<iostream>
 #include<memory>
-#include<string> 
+#include<string>
 #include<vector>
 
 class MalEnv;
 typedef std::vector<std::string> StringVector;
 enum tokenType { SYMBOL, NUMBER, LIST, LIST_V, LIST_H, VECTOR,
-                HASH_MAP, OPERATOR, BOOL, FUNCTION, NIL, STRING, KEYWORD };
+                HASH_MAP, OPERATOR, BOOL, FUNCTION, NIL, STRING,
+                KEYWORD, ATOM };
 
 class AstToken {
     public:
@@ -35,7 +36,8 @@ class AstTokenOperator : public AstToken {
 
     public:
         MalFunction op;
-        AstTokenOperator(MalFunction _op);
+        std::string name;
+        AstTokenOperator(std::string _name, MalFunction _op);
         std::shared_ptr<AstToken> operator()(MalArgs args, MalArgs end);
 };
 
@@ -94,6 +96,12 @@ class AstTokenKeyword : public AstToken {
     public:
         std::string value;
         AstTokenKeyword(std::string _value);
+};
+
+class AstTokenAtom : public AstToken {
+    public:
+        std::shared_ptr<AstToken> object;
+        AstTokenAtom(std::shared_ptr<AstToken> _object);
 };
 
 class AstTokenNil : public AstToken {

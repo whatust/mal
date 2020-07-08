@@ -6,9 +6,10 @@ AstTokenSymbol::AstTokenSymbol(std::string& _name)
 : AstToken(SYMBOL)
 , name(_name){};
 
-AstTokenOperator::AstTokenOperator(MalFunction _op)
+AstTokenOperator::AstTokenOperator(std::string _name, MalFunction _op)
 : AstToken(OPERATOR)
-, op(_op) {};
+, op(_op)
+, name(_name){};
 
 std::shared_ptr<AstToken> AstTokenOperator::operator()(MalArgs args, MalArgs end) {
     return op(args, end);
@@ -118,6 +119,11 @@ AstTokenKeyword::AstTokenKeyword(std::string _value)
 : AstToken(KEYWORD) {
     value = _value.replace(0, 1, "\xff");
 };
+
+AstTokenAtom::AstTokenAtom(std::shared_ptr<AstToken> _object) 
+: AstToken(ATOM) {
+    object = _object;
+}
 
 AstTokenNil::AstTokenNil()
 : AstToken(NIL) {};

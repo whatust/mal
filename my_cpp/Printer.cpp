@@ -144,8 +144,17 @@ std::string pr_str(std::shared_ptr<AstToken> ast, bool print_readably){
                 ret = key_ast->value.replace(0, 1, ":");
                 break;
            }
+           case ATOM: {
+                std::shared_ptr<AstTokenAtom> atom_ast;
+                atom_ast = std::static_pointer_cast<AstTokenAtom>(ast);
+                ret = "atom " + pr_str(atom_ast->object, print_readably);
+                break;
+           }
            case OPERATOR: {
-                throw std::string("Unexpected Operator");
+                std::shared_ptr<AstTokenOperator> op_ast;
+                op_ast = std::static_pointer_cast<AstTokenOperator>(ast);
+                ret = op_ast->name;
+                //throw std::string("Unexpected Operator");
            }
         }
     }

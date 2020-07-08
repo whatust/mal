@@ -74,13 +74,6 @@ StringVector tokenize(const std::string& input) {
             match_found = true;
         }
 
-        /*std::cout << "+";
-        for(auto it=iter; it != std::end(input); it++){
-            std::cout << *it;
-        }
-        std::cout << "+";
-        std::cout << std::endl;*/
-
         // Check
         check_list_balance(!match_found, "\"", "EOF");
     }
