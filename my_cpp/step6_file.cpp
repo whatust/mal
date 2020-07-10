@@ -19,11 +19,15 @@ int main(int argc, char* argv[]) {
 
     std::string prompt = "user> ";
     std::string input;
-
+    std::string args;
     MalEnv repl_env;
+
+    for(int i=1; i < argc; i++) { args += argv[i]; args += " "; }
+
     start_outer_env(repl_env);
     rep(std::string("(def! not(fn* (a) (if a false true)))"), repl_env);
     rep(std::string("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \"\nnil)\")))))"), repl_env);
+    rep(std::string("(def! *ARGV*(" + args + "))"), repl_env);
 
      while(readLine.read(prompt, input)) {
 
