@@ -147,7 +147,7 @@ std::string pr_str(std::shared_ptr<AstToken> ast, bool print_readably){
            case ATOM: {
                 std::shared_ptr<AstTokenAtom> atom_ast;
                 atom_ast = std::static_pointer_cast<AstTokenAtom>(ast);
-                ret = "atom " + pr_str(atom_ast->object, print_readably);
+                ret = "(atom " + pr_str(atom_ast->object, print_readably) + ")";
                 break;
            }
            case OPERATOR: {

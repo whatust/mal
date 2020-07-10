@@ -20,31 +20,36 @@ int main(int argc, char* argv[]) {
     std::string prompt = "user> ";
     std::string input;
     std::string args;
+    std::string filename;
     MalEnv repl_env;
 
-    for(int i=1; i < argc; i++) { args += argv[i]; args += " "; }
+    if(argc > 1) { filename = argv[1]; }
+    for(int i=2; i < argc; i++) { args += "\""; args += argv[i]; args += "\""; }
 
     start_outer_env(repl_env);
     rep(std::string("(def! not(fn* (a) (if a false true)))"), repl_env);
     rep(std::string("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \"\nnil)\")))))"), repl_env);
     rep(std::string("(def! *ARGV*(" + args + "))"), repl_env);
 
-     while(readLine.read(prompt, input)) {
+    if(filename.compare("") != 0) {
+        rep(std::string("(load-file \"" + filename + "\")"), repl_env);
+    } else {
+         while(readLine.read(prompt, input)) {
 
-        std::string out;
+            std::string out;
 
-        try {
-            out = rep(input, repl_env);
-//            repl_env.print();
+            try {
+                out = rep(input, repl_env);
+            }
+            catch(EmptyInput&) {
+                continue;
+            }
+            catch(std::string& error) {
+                std::cerr << error << std::endl;
+                continue;
+            }
+            std::cout << out << std::endl;
         }
-        catch(EmptyInput&) {
-            continue;
-        }
-        catch(std::string& error) {
-            std::cerr << error << std::endl;
-            continue;
-        }
-        std::cout << out << std::endl;
     }
     return 0;
 }
