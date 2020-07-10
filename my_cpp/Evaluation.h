@@ -1,8 +1,6 @@
 #ifndef EVALUATION_H_
 #define EVALUATION_H_
 
-#include<stack>
-
 #include"Types.h"
 #include"Validation.h"
 #include "Environment.h"

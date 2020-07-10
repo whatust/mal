@@ -3,8 +3,9 @@
 
 #include<string>
 #include<memory>
-#include "Types.h"
-#include "Validation.h"
+
+#include"BasicTypes.h"
+#include"Validation.h"
 
 class MalEnv {
 private:

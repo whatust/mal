@@ -7,8 +7,8 @@ DEBUG=-ggdb
 CXXFLAGS=-O3 -Wall $(DEBUG) $(INCPATHS) -std=c++17 -lstdc++fs
 LDFLAGS=-O3 $(DEBUG) $(LIBPATHS) -L. -lreadline -lhistory
 
-LIBSOURCES=ReadLine.cpp Reader.cpp Types.cpp Printer.cpp Validation.cpp \
-		   Evaluation.cpp Environment.cpp Core.cpp
+LIBSOURCES=ReadLine.cpp Reader.cpp BasicTypes.cpp Types.cpp Printer.cpp \
+		   Validation.cpp Evaluation.cpp Environment.cpp Core.cpp
 
 LIBOBJS=$(LIBSOURCES:%.cpp=%.o)
 
