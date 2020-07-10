@@ -2,6 +2,8 @@
 #define PRINTER_H_
 
 #include<algorithm>
+#include<memory>
+#include<string>
 #include<iostream>
 
 #include"Types.h"

@@ -1,10 +1,10 @@
 #ifndef READER_H_
 #define READER_H_
 
-#include<regex>
-#include<vector>
-#include<string>
 #include<iostream>
+#include<regex>
+#include<string>
+#include<vector>
 
 #include"Types.h"
 #include"Validation.h"

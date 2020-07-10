@@ -1,8 +1,11 @@
 #ifndef ENVIRONMENT_H_
 #define ENVIRONMENT_H_
 
-#include<string>
+#include<functional>
+#include<iostream>
 #include<memory>
+#include<string>
+#include<vector>
 
 #include"BasicTypes.h"
 #include"Validation.h"

@@ -2,6 +2,9 @@
 #define _CORE_H_
 
 #include<fstream>
+#include<iostream>
+#include<memory>
+#include<string>
 
 #include"Types.h"
 #include"Validation.h"
