@@ -10,11 +10,11 @@
 
 class AstTokenFunction : public AstToken {
     public:
-        MalEnv* scope;
+        std::shared_ptr<MalEnv> scope;
         std::string larg;
         std::vector<std::string> params;
         std::shared_ptr<AstToken> function;
-        AstTokenFunction(MalEnv* _scope, std::shared_ptr<AstToken> _params,
+        AstTokenFunction(std::shared_ptr<MalEnv> _scope, std::shared_ptr<AstToken> _params,
                                     std::shared_ptr<AstToken> _function);
         ~AstTokenFunction();
 };

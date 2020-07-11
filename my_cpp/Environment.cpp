@@ -1,7 +1,5 @@
 #include "Environment.h"
 
-MalEnv* outer_env;
-
 std::shared_ptr<AstToken>
 MalEnv::find(const std::string& key) {
 
@@ -45,17 +43,6 @@ MalEnv::set_bindings(const std::vector<std::string>& params, std::string largs, 
         }
     }
     return;
-}
-
-MalEnv*
-MalEnv::get_outer() {
-    MalEnv* aux;
-
-    aux = this;
-    while(aux->outer != nullptr)
-        aux = aux->outer;
-
-    return aux;
 }
 
 void MalEnv::print() {

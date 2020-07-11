@@ -1,58 +1,60 @@
 #include"Core.h"
 
-void start_outer_env(MalEnv& repl_env) {
+std::shared_ptr<MalEnv> outer_env;
 
-   repl_env.set("+", std::static_pointer_cast<AstToken>(
+void start_outer_env(std::shared_ptr<MalEnv> repl_env) {
+
+    repl_env->set("+", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("+", &addOperator))));
-    repl_env.set("-", std::static_pointer_cast<AstToken>(
+    repl_env->set("-", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("-", &subOperator))));
-    repl_env.set("*", std::static_pointer_cast<AstToken>(
+    repl_env->set("*", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("*", &mulOperator))));
-    repl_env.set("/", std::static_pointer_cast<AstToken>(
+    repl_env->set("/", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("/", &divOperator))));
-    repl_env.set("=", std::static_pointer_cast<AstToken>(
+    repl_env->set("=", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("=", &eqOperator))));
-    repl_env.set(">", std::static_pointer_cast<AstToken>(
+    repl_env->set(">", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator(">", &gtOperator))));
-    repl_env.set(">=", std::static_pointer_cast<AstToken>(
+    repl_env->set(">=", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator(">=", &gteOperator))));
-    repl_env.set("<", std::static_pointer_cast<AstToken>(
+    repl_env->set("<", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("<", &ltOperator))));
-    repl_env.set("<=", std::static_pointer_cast<AstToken>(
+    repl_env->set("<=", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("<=", &lteOperator))));
-    repl_env.set("list", std::static_pointer_cast<AstToken>(
+    repl_env->set("list", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("list", &listOperator))));
-    repl_env.set("list?", std::static_pointer_cast<AstToken>(
+    repl_env->set("list?", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("list?", &listqOperator))));
-    repl_env.set("empty?", std::static_pointer_cast<AstToken>(
+    repl_env->set("empty?", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("empty?", &emptyOperator))));
-    repl_env.set("count", std::static_pointer_cast<AstToken>(
+    repl_env->set("count", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("count", &countOperator))));
-    repl_env.set("prn", std::static_pointer_cast<AstToken>(
+    repl_env->set("prn", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("prn", &prnOperator))));
-    repl_env.set("str", std::static_pointer_cast<AstToken>(
+    repl_env->set("str", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("str", &strOperator))));
-    repl_env.set("pr-str", std::static_pointer_cast<AstToken>(
+    repl_env->set("pr-str", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("pr-str", &prstrOperator))));
-    repl_env.set("println", std::static_pointer_cast<AstToken>(
+    repl_env->set("println", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("println", &printlnOperator))));
-    repl_env.set("read-string", std::static_pointer_cast<AstToken>(
+    repl_env->set("read-string", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("read-string", &readstrOperator))));
-    repl_env.set("slurp", std::static_pointer_cast<AstToken>(
+    repl_env->set("slurp", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("slurp", &slurpOperator))));
-    repl_env.set("eval", std::static_pointer_cast<AstToken>(
+    repl_env->set("eval", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("eval", &evalOperator))));
-    repl_env.set("atom", std::static_pointer_cast<AstToken>(
+    repl_env->set("atom", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("atom", &atomOperator))));
-    repl_env.set("atom?", std::static_pointer_cast<AstToken>(
+    repl_env->set("atom?", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("atom?", &atomqOperator))));
-    repl_env.set("deref", std::static_pointer_cast<AstToken>(
+    repl_env->set("deref", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("deref", &derefOperator))));
-    repl_env.set("reset!", std::static_pointer_cast<AstToken>(
+    repl_env->set("reset!", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("reset!", &resetOperator))));
-    repl_env.set("swap!", std::static_pointer_cast<AstToken>(
+    repl_env->set("swap!", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("swap!", &swapOperator))));
-    outer_env = &repl_env;
+    outer_env = repl_env;
     return;
 }
 
@@ -339,7 +341,7 @@ std::shared_ptr<AstToken> evalOperator(MalArgs args, MalArgs end) {
 
     check_arguments(end - args != 1, std::to_string(1), std::to_string(end - args));
 
-    return eval((*args), *outer_env);
+    return eval((*args), outer_env);
 }
 
 std::shared_ptr<AstToken> atomOperator(MalArgs args, MalArgs end) {
@@ -397,7 +399,7 @@ std::shared_ptr<AstToken> swapOperator(MalArgs args, MalArgs end) {
         list_ast->list.push_back(*args);
     }
 
-    atom_ast->object = eval(list_ast, *outer_env);
+    atom_ast->object = eval(list_ast, outer_env);
 
     return atom_ast->object;
 }

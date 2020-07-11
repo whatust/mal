@@ -13,7 +13,9 @@
 #include"Reader.h"
 #include"Evaluation.h"
 
-void start_outer_env(MalEnv & repl_env);
+extern std::shared_ptr<MalEnv> outer_env;
+
+void start_outer_env(std::shared_ptr<MalEnv> repl_env);
 std::shared_ptr<AstToken> addOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> subOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> mulOperator(MalArgs args, MalArgs end);

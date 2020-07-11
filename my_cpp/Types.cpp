@@ -1,10 +1,11 @@
 #include"Types.h"
 
-AstTokenFunction::AstTokenFunction(MalEnv* _scope, std::shared_ptr<AstToken>_params,
+AstTokenFunction::AstTokenFunction(std::shared_ptr<MalEnv> _scope, std::shared_ptr<AstToken>_params,
                                             std::shared_ptr<AstToken> _function)
 : AstToken(FUNCTION)
-, scope(_scope)
 , function(_function) {
+
+    scope = _scope;
 
     bool next_args = false;
     std::shared_ptr<AstTokenList> list_ast;
