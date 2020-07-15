@@ -414,11 +414,16 @@ std::shared_ptr<AstToken> consOperator(MalArgs args, MalArgs end) {
     check_token(args[1]->type != LIST, LIST, args[1]->type);
 
     std::shared_ptr<AstTokenList> list_ast;
-    list_ast = std::static_pointer_cast<AstTokenList>(args[1]);
+    list_ast = std::shared_ptr<AstTokenList>(new AstTokenList);
 
-    list_ast->list.insert(std::begin(list_ast->list), args[0]);
+    list_ast->list.push_back(args[0]);
 
-    return args[1];
+    std::shared_ptr<AstTokenList> aux_ast;
+    aux_ast = std::static_pointer_cast<AstTokenList>(args[1]);
+
+    std::copy(std::begin(aux_ast->list), std::end(aux_ast->list), back_inserter(list_ast->list));
+
+    return list_ast;
 }
 
 std::shared_ptr<AstToken> concatOperator(MalArgs args, MalArgs end) {
