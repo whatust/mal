@@ -172,6 +172,14 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<Ma
                     ret = std::static_pointer_cast<AstToken>(std::shared_ptr<AstTokenFunction>(
                                 new AstTokenFunction(env, list_ast->list[1], list_ast->list[2])));
                     loop = false;
+                } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
+                        std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "quote") {
+
+                    check_arguments(list_ast->list.size() != 2, "1", std::to_string(list_ast->list.size() - 1));
+                    ret = list_ast->list[1];
+                    loop = false;
+                    break;
+
                 } else {
                     list_ast = std::static_pointer_cast<AstTokenList> (eval_ast(token, env));
 
