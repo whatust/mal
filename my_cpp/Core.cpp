@@ -54,6 +54,8 @@ void start_outer_env(std::shared_ptr<MalEnv> repl_env) {
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("reset!", &resetOperator))));
     repl_env->set("swap!", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("swap!", &swapOperator))));
+    repl_env->set("cons", std::static_pointer_cast<AstToken>(
+                std::shared_ptr<AstTokenOperator>(new AstTokenOperator("cons", &consOperator))));
     outer_env = repl_env;
     return;
 }
@@ -404,4 +406,16 @@ std::shared_ptr<AstToken> swapOperator(MalArgs args, MalArgs end) {
     return atom_ast->object;
 }
 
+std::shared_ptr<AstToken> consOperator(MalArgs args, MalArgs end) {
+
+    check_arguments(end - args < 2, std::to_string(2), std::to_string(end-args));
+    check_token(args[1]->type != LIST, LIST, args[1]->type);
+
+    std::shared_ptr<AstTokenList> list_ast;
+    list_ast = std::static_pointer_cast<AstTokenList>(args[1]);
+
+    list_ast->list.insert(std::begin(list_ast->list), args[0]);
+
+    return args[1];
+}
 
