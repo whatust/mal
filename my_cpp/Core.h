@@ -1,8 +1,10 @@
 #ifndef _CORE_H_
 #define _CORE_H_
 
+#include<algorithm>
 #include<fstream>
 #include<iostream>
+#include<iterator>
 #include<memory>
 #include<string>
 
@@ -48,5 +50,6 @@ std::shared_ptr<AstToken> resetOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> swapOperator(MalArgs args, MalArgs end);
 
 std::shared_ptr<AstToken> consOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> concatOperator(MalArgs args, MalArgs end);
 
 #endif //_CORE_H_

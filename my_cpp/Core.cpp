@@ -56,6 +56,8 @@ void start_outer_env(std::shared_ptr<MalEnv> repl_env) {
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("swap!", &swapOperator))));
     repl_env->set("cons", std::static_pointer_cast<AstToken>(
                 std::shared_ptr<AstTokenOperator>(new AstTokenOperator("cons", &consOperator))));
+    repl_env->set("concat", std::static_pointer_cast<AstToken>(
+                std::shared_ptr<AstTokenOperator>(new AstTokenOperator("concat", &concatOperator))));
     outer_env = repl_env;
     return;
 }
@@ -419,3 +421,20 @@ std::shared_ptr<AstToken> consOperator(MalArgs args, MalArgs end) {
     return args[1];
 }
 
+std::shared_ptr<AstToken> concatOperator(MalArgs args, MalArgs end) {
+
+    std::shared_ptr<AstTokenList> list_ast;
+    list_ast = std::shared_ptr<AstTokenList>(new AstTokenList);
+
+    for(auto it=args; it != end; it++){
+        check_token((*it)->type != LIST, LIST, (*it)->type);
+
+        std::shared_ptr<AstTokenList> aux_ast;
+        aux_ast = std::static_pointer_cast<AstTokenList>(*it);
+
+        std::copy(std::begin(aux_ast->list), std::end(aux_ast->list), std::back_inserter(list_ast->list));
+
+    }
+
+    return list_ast;
+}
