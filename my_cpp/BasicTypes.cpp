@@ -2,7 +2,7 @@
 
 AstToken::AstToken(tokenType _type) : type(_type){};
 
-AstTokenSymbol::AstTokenSymbol(std::string& _name)
+AstTokenSymbol::AstTokenSymbol(const std::string& _name)
 : AstToken(SYMBOL)
 , name(_name){};
 
@@ -22,6 +22,9 @@ AstTokenNumber::AstTokenNumber(const std::string& _number)
 AstTokenNumber::AstTokenNumber(int _number)
 : AstToken(NUMBER)
 , value(_number){};
+
+AstTokenNumber::AstTokenNumber()
+: AstToken(NUMBER) {};
 
 AstTokenList::AstTokenList()
 : AstToken(LIST) {};

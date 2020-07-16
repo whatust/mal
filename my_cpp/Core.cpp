@@ -123,14 +123,21 @@ bool equal(std::shared_ptr<AstToken> a, std::shared_ptr<AstToken> b) {
         std::string string_a = std::static_pointer_cast<AstTokenString>(a)->value;
         std::string string_b = std::static_pointer_cast<AstTokenString>(b)->value;
 
-        return string_a.compare(string_b) == 0;
+        return string_a == string_b;
+
+    }else if(a->type == SYMBOL && b->type == SYMBOL) {
+
+        std::string name_a = std::static_pointer_cast<AstTokenSymbol>(a)->name;
+        std::string name_b = std::static_pointer_cast<AstTokenSymbol>(b)->name;
+
+        return name_a == name_b;
 
     }else if(a->type == KEYWORD && b->type == KEYWORD) {
 
         std::string keyword_a = std::static_pointer_cast<AstTokenKeyword>(a)->value;
         std::string keyword_b = std::static_pointer_cast<AstTokenKeyword>(b)->value;
 
-        return keyword_a.compare(keyword_b) == 0;
+        return keyword_a == keyword_b;
 
     }else if((a->type == LIST || a->type == VECTOR) && (b->type == LIST || b->type == VECTOR)) {
 
@@ -411,7 +418,7 @@ std::shared_ptr<AstToken> swapOperator(MalArgs args, MalArgs end) {
 std::shared_ptr<AstToken> consOperator(MalArgs args, MalArgs end) {
 
     check_arguments(end - args < 2, std::to_string(2), std::to_string(end-args));
-    check_token(args[1]->type != LIST, LIST, args[1]->type);
+    check_token(args[1]->type != LIST && args[1]->type != VECTOR, LIST, args[1]->type);
 
     std::shared_ptr<AstTokenList> list_ast;
     list_ast = std::shared_ptr<AstTokenList>(new AstTokenList);
@@ -432,7 +439,7 @@ std::shared_ptr<AstToken> concatOperator(MalArgs args, MalArgs end) {
     list_ast = std::shared_ptr<AstTokenList>(new AstTokenList);
 
     for(auto it=args; it != end; it++){
-        check_token((*it)->type != LIST, LIST, (*it)->type);
+        check_token((*it)->type != LIST && (*it)->type != VECTOR, LIST, (*it)->type);
 
         std::shared_ptr<AstTokenList> aux_ast;
         aux_ast = std::static_pointer_cast<AstTokenList>(*it);

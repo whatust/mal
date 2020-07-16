@@ -60,6 +60,7 @@ std::string rep(const std::string& input, std::shared_ptr<MalEnv>repl_env) {
 }
 
 std::shared_ptr<AstToken> READ(const std::string& input) {
+    //std::cout << pr_str(read_str(input), true) << std::endl;
     return read_str(input);
 }
 

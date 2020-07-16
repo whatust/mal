@@ -72,6 +72,7 @@ StringVector tokenize(const std::string& input) {
             tokens.push_back(match.str());
             iter += match.length(0);
             match_found = true;
+            break;
         }
 
         // Check

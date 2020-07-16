@@ -6,7 +6,8 @@
 
 #include"Types.h"
 #include"Validation.h"
-#include "Environment.h"
+#include"Environment.h"
+#include"Printer.h"
 
 std::shared_ptr<AstToken> eval_ast (std::shared_ptr<AstToken> ast, std::shared_ptr<MalEnv> repl_env);
 std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken>, std::shared_ptr<MalEnv> repl_env);

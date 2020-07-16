@@ -28,7 +28,7 @@ class AstTokenSymbol : public AstToken {
 
     public:
         std::string name;
-        AstTokenSymbol(std::string& _name);
+        AstTokenSymbol(const std::string& _name);
 };
 
 class AstTokenOperator : public AstToken {
@@ -45,6 +45,7 @@ class AstTokenNumber : public AstToken {
         int value;
         AstTokenNumber(const std::string& _number);
         AstTokenNumber(int _number);
+        AstTokenNumber();
 };
 
 class AstTokenList : public AstToken {

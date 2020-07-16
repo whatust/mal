@@ -74,6 +74,59 @@ std::shared_ptr<AstToken> eval_ast (std::shared_ptr<AstToken> ast, std::shared_p
     return ret;
 }
 
+bool is_pair(std::shared_ptr<AstToken> ast, int pos) {
+    return (ast->type == LIST || ast->type == LIST_V) && (std::static_pointer_cast<AstTokenList>(ast)->list.size() - pos) > 0;
+}
+
+std::shared_ptr<AstToken> quasiquote(std::shared_ptr<AstToken> ast, int pos) {
+
+    if(!is_pair(ast, pos)) {
+
+        std::shared_ptr<AstTokenList> aux_ast(new AstTokenList());
+
+        aux_ast->list.push_back(std::shared_ptr<AstTokenSymbol>(new AstTokenSymbol("quote")));
+
+        if(ast->type == LIST || ast->type == LIST_V){
+            aux_ast->list.push_back(std::shared_ptr<AstTokenList>(new AstTokenList()));
+        }else{
+            aux_ast->list.push_back(ast);
+        }
+
+        return aux_ast;
+
+    }else{
+        std::shared_ptr<AstTokenList> list_ast;
+        list_ast = std::static_pointer_cast<AstTokenList> (ast);
+
+        if(list_ast->list[pos]->type == SYMBOL &&
+            std::static_pointer_cast<AstTokenSymbol>(list_ast->list[pos])->name =="unquote") {
+
+            check_arguments(list_ast->list.size() - pos < 2, "1", std::to_string(list_ast->list.size() - pos -1));
+
+            return list_ast->list[pos + 1];
+
+        } else if(is_pair(list_ast->list[pos], 0) && std::static_pointer_cast<AstTokenList>(list_ast->list[pos])->list[0]->type == SYMBOL &&
+                std::static_pointer_cast<AstTokenSymbol>(std::static_pointer_cast<AstTokenList>(list_ast->list[pos])->list[0])->name == "splice-unquote") {
+
+            //check_arguments(list_ast->list[0].size() < 2, "1", std::to_string(list_ast->list.size() -1));
+
+            std::shared_ptr<AstTokenList> aux_ast(new AstTokenList());
+
+            aux_ast->list.push_back(std::shared_ptr<AstTokenSymbol>(new AstTokenSymbol("concat")));
+            aux_ast->list.push_back(std::static_pointer_cast<AstTokenList>(list_ast->list[pos])->list[1]);
+            aux_ast->list.push_back(quasiquote(ast, pos + 1));
+
+            return aux_ast;
+        }
+        std::shared_ptr<AstTokenList> aux_ast(new AstTokenList());
+        aux_ast->list.push_back(std::shared_ptr<AstTokenSymbol>(new AstTokenSymbol("cons")));
+        aux_ast->list.push_back(quasiquote(list_ast->list[pos], 0));
+        aux_ast->list.push_back(quasiquote(ast, pos + 1));
+
+        return aux_ast;
+    }
+}
+
 std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<MalEnv> repl_env) {
 
     bool loop = true;
@@ -178,6 +231,14 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<Ma
                     check_arguments(list_ast->list.size() != 2, "1", std::to_string(list_ast->list.size() - 1));
                     ret = list_ast->list[1];
                     loop = false;
+                    break;
+
+                } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
+                        std::static_pointer_cast<AstTokenSymbol>(list_ast->list[0])->name == "quasiquote") {
+
+                    check_arguments(list_ast->list.size() < 2, "1", std::to_string(list_ast->list.size() - 1));
+                    token = quasiquote(list_ast->list[1], 0);
+
                     break;
 
                 } else {
