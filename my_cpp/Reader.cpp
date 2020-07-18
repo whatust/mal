@@ -124,10 +124,10 @@ AstTokenPtr read_list(Reader& reader, char open_char) {
         ast->type = LIST;
     } else if (open_char == '[') {
         end_str = "]";
-        ast->type = LIST_V;
+        ast->type = VECTOR;
     } else {
         end_str = "}";
-        ast->type = LIST_H;
+        ast->type = HASH_MAP;
     }
 
     reader.next();

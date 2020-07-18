@@ -1,9 +1,41 @@
 #include"Validation.h"
 
-const char *token_type_str[] = { "SYMBOL", "NUMBER", "LIST", "LIST_V",
-                                    "LIST_H", "VECTOR", "HASH_MAP", "OPERATOR",
-                                    "BOOL", "FUNCTION", "NIL", "STRING",
-                                    "KEYWORD", "ATOM" };
+const char *token_to_str[] = { "SYMBOL", "NUMBER", "LIST",
+                                "VECTOR", "HASH_MAP", "OPERATOR",
+                                "BOOL", "FUNCTION", "NIL", "STRING",
+                                "KEYWORD", "ATOM" };
+
+const char*
+TokenException::what() const noexcept {
+
+    const char* _error = "Error: Invalid token got %s, expected: %s";
+
+    char* error = (char*)malloc(strlen(_error) + strlen(token_to_str[got]) +
+                                        strlen(token_to_str[expected] + 1));
+    sprintf(error, _error, token_to_str[got], token_to_str[expected]);
+
+    return error;
+}
+
+const char*
+ArgumentException::what() const noexcept {
+
+    const char* _error = "Error: Wrong number of arguments got %i arguments expected: %i";
+
+    char* error = (char*)malloc(strlen(_error) + 11 + 11 + 1);
+    sprintf(error, _error, got, expected);
+
+    return error;
+}
+
+void assert_args(bool expr, ArgumentException e){
+
+    if(expr) {
+        return;
+    }
+
+    throw e;
+}
 
 void check_list_balance(bool condition, const std::string& expected, const std::string& got) {
 
@@ -50,8 +82,8 @@ void check_token(bool condition, const tokenType& token_expected, const tokenTyp
     if (condition) {
 
         std::string error = "Error: Expected Token type: %s got: %s";
-        std::string str_expected(token_type_str[token_expected]);
-        std::string str_got(token_type_str[token_got]);
+        std::string str_expected(token_to_str[token_expected]);
+        std::string str_got(token_to_str[token_got]);
 
         char* aux_message = new char[error.length() + str_expected.length() + str_got.length() + 1];
 
@@ -65,8 +97,8 @@ void check_token(bool condition, const tokenType& token_expected, const tokenTyp
 void unimplemented_comparison(const tokenType& token_a, const tokenType& token_b) {
 
     std::string error = "Error: Unimplemented comparison between %s and %s";
-    std::string str_a(token_type_str[token_a]);
-    std::string str_b(token_type_str[token_b]);
+    std::string str_a(token_to_str[token_a]);
+    std::string str_b(token_to_str[token_b]);
 
     char* aux_message = new char[error.length() + str_a.length() + str_b.length() + 1];
 

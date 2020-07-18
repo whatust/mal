@@ -47,33 +47,31 @@ std::string pr_str(std::shared_ptr<AstToken> ast, bool print_readably){
 
             case SYMBOL: {
                 std::shared_ptr<AstTokenSymbol> symbol_ast;
-                symbol_ast = std::static_pointer_cast<AstTokenSymbol>(ast);
+                symbol_ast = as_type<AstTokenSymbol>(ast);
                 ret = symbol_ast->name;
                 break;
             }
 
             case NUMBER: {
                 std::shared_ptr<AstTokenNumber> number_ast;
-                number_ast = std::static_pointer_cast<AstTokenNumber>(ast);
+                number_ast = as_type<AstTokenNumber>(ast);
                 ret = std::to_string(number_ast->value);
                 break;
             }
 
-            case LIST_H:
             case LIST: {
                 std::shared_ptr<AstTokenList> list_ast;
-                list_ast = std::static_pointer_cast<AstTokenList>(ast);
+                list_ast = as_type<AstTokenList>(ast);
 
-                ret = ast->type == LIST ? "(" : "{";
+                ret = "(";
                 pr_list(ret, list_ast, print_readably);
-                ret += ast->type == LIST ? ")" : "}";
+                ret += ")";
 
                 break;
             }
-            case LIST_V:
             case VECTOR: {
                 std::shared_ptr<AstTokenVector> vect_ast;
-                vect_ast = std::static_pointer_cast<AstTokenVector>(ast);
+                vect_ast = as_type<AstTokenVector>(ast);
 
                 ret = "[";
                 pr_list(ret, vect_ast, print_readably);
@@ -83,7 +81,7 @@ std::string pr_str(std::shared_ptr<AstToken> ast, bool print_readably){
            }
            case HASH_MAP: {
                 std::shared_ptr<AstTokenHashMap> hash_ast;
-                hash_ast = std::static_pointer_cast<AstTokenHashMap>(ast);
+                hash_ast = as_type<AstTokenHashMap>(ast);
 
                 ret = "{";
                 pr_hash(ret, hash_ast, print_readably);
@@ -93,7 +91,7 @@ std::string pr_str(std::shared_ptr<AstToken> ast, bool print_readably){
            }
            case BOOL: {
                 std::shared_ptr<AstTokenBool> bool_ast;
-                bool_ast = std::static_pointer_cast<AstTokenBool>(ast);
+                bool_ast = as_type<AstTokenBool>(ast);
                 ret = bool_ast->value ? "true" : "false";
 
                 break;
@@ -101,7 +99,7 @@ std::string pr_str(std::shared_ptr<AstToken> ast, bool print_readably){
            case STRING: {
 
                 std::shared_ptr<AstTokenString> str_ast;
-                str_ast = std::static_pointer_cast<AstTokenString>(ast);
+                str_ast = as_type<AstTokenString>(ast);
                 std::string readably_str;
 
                 if(print_readably){
@@ -140,19 +138,19 @@ std::string pr_str(std::shared_ptr<AstToken> ast, bool print_readably){
            }
            case KEYWORD: {
                 std::shared_ptr<AstTokenKeyword> key_ast;
-                key_ast = std::static_pointer_cast<AstTokenKeyword>(ast);
+                key_ast = as_type<AstTokenKeyword>(ast);
                 ret = key_ast->value.replace(0, 1, ":");
                 break;
            }
            case ATOM: {
                 std::shared_ptr<AstTokenAtom> atom_ast;
-                atom_ast = std::static_pointer_cast<AstTokenAtom>(ast);
+                atom_ast = as_type<AstTokenAtom>(ast);
                 ret = "(atom " + pr_str(atom_ast->object, print_readably) + ")";
                 break;
            }
            case OPERATOR: {
                 std::shared_ptr<AstTokenOperator> op_ast;
-                op_ast = std::static_pointer_cast<AstTokenOperator>(ast);
+                op_ast = as_type<AstTokenOperator>(ast);
                 ret = op_ast->name;
                 //throw std::string("Unexpected Operator");
            }

@@ -1,20 +1,19 @@
 #include"Types.h"
 
 AstTokenFunction::AstTokenFunction(std::shared_ptr<MalEnv> _scope, std::shared_ptr<AstToken>_params,
-                                            std::shared_ptr<AstToken> _function)
-: AstToken(FUNCTION)
-, function(_function) {
+                                            std::shared_ptr<AstToken> _function, bool _macro)
+: AstToken(FUNCTION) , function(_function) , is_macro(_macro) {
 
     scope = _scope;
 
     bool next_args = false;
     std::shared_ptr<AstTokenList> list_ast;
-    list_ast = std::static_pointer_cast<AstTokenList>(_params);
+    list_ast = as_type<AstTokenList>(_params);
 
     for(auto key : list_ast->list) {
 
         std::shared_ptr<AstTokenSymbol> symbol;
-        symbol = std::static_pointer_cast<AstTokenSymbol>(key);
+        symbol = as_type<AstTokenSymbol>(key);
 
         if(next_args){
             larg = symbol->name;

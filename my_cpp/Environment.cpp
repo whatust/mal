@@ -36,8 +36,7 @@ MalEnv::set_bindings(const std::vector<std::string>& params, std::string largs, 
     for(auto it = std::begin(params); it != std::end(params); it++) {
 
         if(it->compare(largs) == 0){
-            bindings[*it] = std::static_pointer_cast<AstToken>(
-                std::shared_ptr<AstTokenList>(new AstTokenList(init, end)));
+            bindings[*it] = std::shared_ptr<AstTokenList>(new AstTokenList(init, end));
         } else {
             bindings[*it] = *init++;
         }
