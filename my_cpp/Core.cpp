@@ -37,7 +37,7 @@ void start_outer_env(std::shared_ptr<MalEnv> repl_env) {
 
 std::shared_ptr<AstToken> addOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args == 2, ArgumentException(2, end - args));
+    arg_assert(end - args == 2, ArgumentException(2, end - args));
     int num_a = as_type<AstTokenNumber>(*args++)->value;
     int num_b = as_type<AstTokenNumber>(*args)->value;
 
@@ -46,7 +46,7 @@ std::shared_ptr<AstToken> addOperator(MalArgs args, MalArgs end) {
 
 std::shared_ptr<AstToken> subOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args == 2, ArgumentException(2, end - args));
+    arg_assert(end - args == 2, ArgumentException(2, end - args));
     int num_a = as_type<AstTokenNumber>(*args++)->value;
     int num_b = as_type<AstTokenNumber>(*args)->value;
 
@@ -54,7 +54,7 @@ std::shared_ptr<AstToken> subOperator(MalArgs args, MalArgs end) {
 
 std::shared_ptr<AstToken> mulOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args == 2, ArgumentException(2, end - args));
+    arg_assert(end - args == 2, ArgumentException(2, end - args));
     int num_a = as_type<AstTokenNumber>(*args++)->value;
     int num_b = as_type<AstTokenNumber>(*args)->value;
 
@@ -63,7 +63,7 @@ std::shared_ptr<AstToken> mulOperator(MalArgs args, MalArgs end) {
 
 std::shared_ptr<AstToken> divOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args == 2, ArgumentException(2, end - args));
+    arg_assert(end - args == 2, ArgumentException(2, end - args));
     int num_a = as_type<AstTokenNumber>(*args++)->value;
     int num_b = as_type<AstTokenNumber>(*args)->value;
 
@@ -143,7 +143,7 @@ bool equal(std::shared_ptr<AstToken> a, std::shared_ptr<AstToken> b) {
 
 std::shared_ptr<AstToken> eqOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args == 2, ArgumentException(2, end - args));
+    arg_assert(end - args == 2, ArgumentException(2, end - args));
     std::shared_ptr<AstToken> a = (*args++);
     std::shared_ptr<AstToken> b = (*args);
 
@@ -152,7 +152,7 @@ std::shared_ptr<AstToken> eqOperator(MalArgs args, MalArgs end) {
 
 std::shared_ptr<AstToken> ltOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args == 2, ArgumentException(2, end - args));
+    arg_assert(end - args == 2, ArgumentException(2, end - args));
     int num_a = as_type<AstTokenNumber>(*args++)->value;
     int num_b = as_type<AstTokenNumber>(*args)->value;
 
@@ -161,7 +161,7 @@ std::shared_ptr<AstToken> ltOperator(MalArgs args, MalArgs end) {
 
 std::shared_ptr<AstToken> lteOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args == 2, ArgumentException(2, end - args));
+    arg_assert(end - args == 2, ArgumentException(2, end - args));
     int num_a = as_type<AstTokenNumber>(*args++)->value;
     int num_b = as_type<AstTokenNumber>(*args)->value;
 
@@ -170,7 +170,7 @@ std::shared_ptr<AstToken> lteOperator(MalArgs args, MalArgs end) {
 
 std::shared_ptr<AstToken> gtOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args == 2, ArgumentException(2, end - args));
+    arg_assert(end - args == 2, ArgumentException(2, end - args));
     int num_a = as_type<AstTokenNumber>(*args++)->value;
     int num_b = as_type<AstTokenNumber>(*args)->value;
 
@@ -179,7 +179,7 @@ std::shared_ptr<AstToken> gtOperator(MalArgs args, MalArgs end) {
 
 std::shared_ptr<AstToken> gteOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args == 2, ArgumentException(2, end - args));
+    arg_assert(end - args == 2, ArgumentException(2, end - args));
     int num_a = as_type<AstTokenNumber>(*args++)->value;
     int num_b = as_type<AstTokenNumber>(*args)->value;
 
@@ -194,7 +194,7 @@ std::shared_ptr<AstToken> listOperator(MalArgs args, MalArgs end) {
 
 std::shared_ptr<AstToken> listqOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args == 1, ArgumentException(1, end - args));
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
 
     return std::shared_ptr<AstTokenBool>(new AstTokenBool((*args)->type == LIST));
 }
@@ -311,28 +311,28 @@ std::shared_ptr<AstToken> slurpOperator(MalArgs args, MalArgs end) {
 
 std::shared_ptr<AstToken> evalOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args == 1, ArgumentException(1, end - args));
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
 
     return eval((*args), outer_env);
 }
 
 std::shared_ptr<AstToken> atomOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args == 1, ArgumentException(1, end - args));
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
 
     return std::shared_ptr<AstTokenAtom>(new AstTokenAtom(*args));
 }
 
 std::shared_ptr<AstToken> atomqOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args == 1, ArgumentException(1, end - args));
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
 
     return std::shared_ptr<AstTokenBool>(new AstTokenBool((*args)->type == ATOM));
 }
 
 std::shared_ptr<AstToken> derefOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args == 1, ArgumentException(1, end - args));
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
 
     std::shared_ptr<AstTokenAtom> atom_ast;
     atom_ast = as_type<AstTokenAtom>(*args);
@@ -342,7 +342,7 @@ std::shared_ptr<AstToken> derefOperator(MalArgs args, MalArgs end) {
 
 std::shared_ptr<AstToken> resetOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args == 2, ArgumentException(2, end - args));
+    arg_assert(end - args == 2, ArgumentException(2, end - args));
 
     std::shared_ptr<AstTokenAtom> atom_ast;
     atom_ast = as_type<AstTokenAtom>(*args);
@@ -353,7 +353,7 @@ std::shared_ptr<AstToken> resetOperator(MalArgs args, MalArgs end) {
 
 std::shared_ptr<AstToken> swapOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args >= 2, ArgumentException(2, end - args));
+    arg_assert(end - args >= 2, ArgumentException(2, end - args));
 
     std::shared_ptr<AstTokenList> list_ast;
     list_ast = std::shared_ptr<AstTokenList>(new AstTokenList);
@@ -375,7 +375,7 @@ std::shared_ptr<AstToken> swapOperator(MalArgs args, MalArgs end) {
 
 std::shared_ptr<AstToken> consOperator(MalArgs args, MalArgs end) {
 
-    assert_args(end - args == 2, ArgumentException(2, end - args));
+    arg_assert(end - args == 2, ArgumentException(2, end - args));
 
     std::shared_ptr<AstTokenList> list_ast;
     list_ast = std::shared_ptr<AstTokenList>(new AstTokenList);
@@ -396,7 +396,6 @@ std::shared_ptr<AstToken> concatOperator(MalArgs args, MalArgs end) {
     list_ast = std::shared_ptr<AstTokenList>(new AstTokenList);
 
     for(auto it=args; it != end; it++){
-        check_token((*it)->type != LIST && (*it)->type != VECTOR, LIST, (*it)->type);
 
         std::shared_ptr<AstTokenList> aux_ast;
         aux_ast = as_type<AstTokenList>(*it);

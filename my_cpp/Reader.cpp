@@ -75,8 +75,7 @@ StringVector tokenize(const std::string& input) {
             break;
         }
 
-        // Check
-        check_list_balance(!match_found, "\"", "EOF");
+        bal_assert(match_found, BalException("\""));
     }
     return tokens;
 }
@@ -131,11 +130,11 @@ AstTokenPtr read_list(Reader& reader, char open_char) {
     }
 
     reader.next();
-    check_list_balance(reader.is_eof(), end_str, "EOF");
+    bal_assert(!reader.is_eof(), BalException(end_str));
 
     while(reader.peek() != end_str) {
         ast->list.push_back(std::shared_ptr<AstToken>(read_form(reader)));
-        check_list_balance(reader.is_eof(), end_str, "EOF");
+        bal_assert(!reader.is_eof(), BalException(end_str));
     }
     reader.next();
 
@@ -146,7 +145,7 @@ AstTokenPtr read_quote(std::string token, Reader& reader) {
 
     AstTokenList* ast = new AstTokenList();
     ast->list.push_back(std::shared_ptr<AstToken>(new AstTokenSymbol(token)));
-    check_valid_expression(reader.is_eof(), "expression", "EOF");
+    bal_assert(!reader.is_eof(), BalException("expression"));
     ast->list.push_back(std::shared_ptr<AstToken>(read_form(reader)));
 
     return ast;
@@ -159,10 +158,10 @@ AstTokenPtr read_meta(std::string token, Reader& reader) {
 
     ast->list.push_back(std::shared_ptr<AstToken>(new AstTokenSymbol(token)));
 
-    check_valid_expression(reader.is_eof(), "expression", "EOF");
+    bal_assert(!reader.is_eof(), BalException("expression"));
     aux = read_form(reader);
 
-    check_valid_expression(reader.is_eof(), "expression", "EOF");
+    bal_assert(!reader.is_eof(), BalException("expression"));
     ast->list.push_back(std::shared_ptr<AstToken>(read_form(reader)));
 
     ast->list.push_back(std::shared_ptr<AstToken>(aux));

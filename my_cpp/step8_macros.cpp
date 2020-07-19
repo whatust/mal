@@ -53,6 +53,14 @@ int main(int argc, char* argv[]) {
                 std::cerr << error.what() << std::endl;
                 continue;
             }
+            catch(ArgumentException& error){
+                std::cerr << error.what() << std::endl;
+                continue;
+            }
+            catch(SymException& error){
+                std::cerr << error.what() << std::endl;
+                continue;
+            }
             catch(std::exception& error){
                 std::cerr << error.what() << std::endl;
                 continue;

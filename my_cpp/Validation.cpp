@@ -28,70 +28,54 @@ ArgumentException::what() const noexcept {
     return error;
 }
 
-void assert_args(bool expr, ArgumentException e){
+const char*
+MapException::what() const noexcept {
 
-    if(expr) {
-        return;
-    }
+    const char* error = "Error: Hashmap needs even number of arguments (key:value)";
 
+    return error;
+}
+
+const char*
+SymException::what() const noexcept {
+
+    const char* _error = "Error: Symbol %s not found";
+
+    char* error = (char*)malloc(strlen(_error) + symbol.length() + 1);
+    sprintf(error, _error, symbol.c_str());
+
+    return error;
+}
+
+const char*
+BalException::what() const noexcept {
+
+    const char* _error = "Error: Expected %s got EOF";
+
+    char* error = (char*)malloc(strlen(_error) + expected.length() + 1);
+    sprintf(error, _error, expected.c_str());
+
+    return error;
+}
+
+void arg_assert(bool expr, ArgumentException e){
+    if(expr) return;
     throw e;
 }
 
-void check_list_balance(bool condition, const std::string& expected, const std::string& got) {
-
-    if (condition) {
-        std::string error = "Error: Expected %s got: %s";
-        char* aux_message = new char[error.length() + expected.length() + got.length() + 1];
-
-        sprintf(aux_message, error.c_str(), expected.c_str(), got.c_str());
-        std::string error_message(std::move(aux_message));
-        throw error_message;
-    }
-    return;
+void map_assert(bool expr, MapException e){
+    if(expr) return;
+    throw e;
 }
 
-void check_valid_expression(bool condition, const std::string& expected, const std::string& got) {
-
-    if (condition) {
-
-        std::string error = "Error: Expected %s got: %s";
-        char* aux_message = new char[error.length() + expected.length() + got.length() + 1];
-
-        sprintf(aux_message, error.c_str(), expected.c_str(), got.c_str());
-        std::string error_message(std::move(aux_message));
-        throw error_message;
-    }
-    return;
+void sym_assert(bool expr, SymException e){
+    if(expr) return;
+    throw e;
 }
 
-void check_valid_symbol(bool condition, const std::string& error, const std::string &symbol) {
-
-    char* aux_message = new char[error.length() + symbol.length() + 1];
-
-    if (condition)  {
-        sprintf( aux_message, error.c_str(), symbol.c_str());
-        std::string error_message(std::move(aux_message));
-        throw error_message;
-    }
-    delete[] aux_message;
-    return;
-}
-
-void check_token(bool condition, const tokenType& token_expected, const tokenType& token_got) {
-
-    if (condition) {
-
-        std::string error = "Error: Expected Token type: %s got: %s";
-        std::string str_expected(token_to_str[token_expected]);
-        std::string str_got(token_to_str[token_got]);
-
-        char* aux_message = new char[error.length() + str_expected.length() + str_got.length() + 1];
-
-        sprintf(aux_message, error.c_str(), str_expected.c_str(), str_got.c_str());
-        std::string error_message(std::move(aux_message));
-        throw error_message;
-    }
-    return;
+void bal_assert(bool expr, BalException e) {
+    if(expr) return;
+    throw e;
 }
 
 void unimplemented_comparison(const tokenType& token_a, const tokenType& token_b) {
@@ -106,30 +90,5 @@ void unimplemented_comparison(const tokenType& token_a, const tokenType& token_b
     std::string error_message(std::move(aux_message));
 
     throw error_message;
-}
-
-void check_arguments(bool condition, const std::string& expected, const std::string& got) {
-
-    if (condition) {
-
-        std::string error = "Error: Insuficient number of arguments expected %s arguments got: %s";
-        char* aux_message = new char[error.length() + expected.length() + got.length() + 1];
-
-        sprintf(aux_message, error.c_str(), expected.c_str(), got.c_str());
-        std::string error_message(std::move(aux_message));
-        throw error_message;
-    }
-    return;
-}
-
-void check_map(bool condition) {
-
-    std::string error_message("Invalid number of parameters entry on hash map");
-
-    if (condition) {
-
-        throw error_message;
-    }
-    return;
 }
 

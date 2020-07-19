@@ -29,14 +29,33 @@ class ArgumentException : public std::exception {
         const char* what() const noexcept;
 };
 
-void assert_args(bool expr, ArgumentException e);
+class MapException : public std::exception {
+    private:
+    public:
+        const char* what() const noexcept;
+};
 
-void check_list_balance(bool condition, const std::string& expected, const std::string& got);
-void check_valid_expression(bool condition, const std::string& error, const std::string& got);
-void check_valid_symbol(bool condition, const std::string& error, const std::string &symbol);
-void check_token(bool condition, const tokenType& token_expected, const tokenType& token_got);
+class SymException : public std::exception {
+    private:
+        std::string symbol;
+    public:
+        const char* what() const noexcept;
+        SymException(std::string _symbol) : symbol(_symbol) {};
+};
+
+class BalException : public std::exception {
+    private:
+        std::string expected;
+    public:
+        const char* what() const noexcept;
+        BalException(std::string _expected) : expected(_expected) {};
+};
+
+void arg_assert(bool expr, ArgumentException e);
+void map_assert(bool expr, MapException e);
+void sym_assert(bool expr, SymException e);
+void bal_assert(bool expr, BalException e);
+
 void unimplemented_comparison(const tokenType& token_a, const tokenType& token_b);
-void check_arguments(bool condition, const std::string& expected, const std::string& got);
-void check_map(bool condition);
 
 #endif //VALIDATION_H_

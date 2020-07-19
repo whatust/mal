@@ -46,8 +46,7 @@ std::shared_ptr<AstToken> eval_ast (std::shared_ptr<AstToken> ast, std::shared_p
             std::shared_ptr<AstTokenHashMap> hash_ast(new AstTokenHashMap);
 
             auto token=std::begin(list_ast->list);
-            //check_map((std::end(list_ast->list) - token) % 2 || std::end(list_ast->list) - token == 0);
-            check_map((std::end(list_ast->list) - token) % 2);
+            map_assert((std::end(list_ast->list) - token) % 2 == 0, MapException());
 
             while (token != std::end(list_ast->list)) {
 
@@ -102,14 +101,16 @@ std::shared_ptr<AstToken> quasiquote(std::shared_ptr<AstToken> ast, int pos) {
         if(list_ast->list[pos]->type == SYMBOL &&
             as_type<AstTokenSymbol>(list_ast->list[pos])->name =="unquote") {
 
-            check_arguments(list_ast->list.size() - pos < 2, "1", std::to_string(list_ast->list.size() - pos -1));
+            arg_assert(list_ast->list.size() - pos >= 2, ArgumentException(
+                                        1, list_ast->list.size() - pos - 1));
 
             return list_ast->list[pos + 1];
 
         } else if(is_pair(list_ast->list[pos], 0) && as_type<AstTokenList>(list_ast->list[pos])->list[0]->type == SYMBOL &&
                 as_type<AstTokenSymbol>(as_type<AstTokenList>(list_ast->list[pos])->list[0])->name == "splice-unquote") {
 
-            //check_arguments(list_ast->list[0].size() < 2, "1", std::to_string(list_ast->list.size() -1));
+            arg_assert(as_type<AstTokenList>(list_ast->list[pos])->list.size() >= 2,
+                                    ArgumentException(1, list_ast->list.size() - 1));
 
             std::shared_ptr<AstTokenList> aux_ast(new AstTokenList());
 
@@ -166,8 +167,8 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<Ma
             if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
                 as_type<AstTokenSymbol>(list_ast->list[0])->name == "def!"){
 
-                check_arguments(list_ast->list.size() - 1 != 2, "2", std::to_string(list_ast->list.size() - 1));
-                check_token(list_ast->list[1]->type != SYMBOL, SYMBOL, list_ast->list[1]->type);
+                arg_assert(list_ast->list.size() - 1 == 2, ArgumentException(
+                                                2, list_ast->list.size() - 1));
 
                 std::string key_token = as_type<AstTokenSymbol>(list_ast->list[1])->name;
                 std::shared_ptr<AstToken> value = eval(list_ast->list[2], env);
@@ -179,19 +180,17 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<Ma
             } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
                 as_type<AstTokenSymbol>(list_ast->list[0])->name == "let*"){
 
-                check_arguments(list_ast->list.size() - 1 != 2, "2", std::to_string(list_ast->list.size() - 1));
-                check_token(list_ast->list[1]->type != LIST && list_ast->list[1]->type != VECTOR,
-                                                                LIST, list_ast->list[1]->type);
+                arg_assert(list_ast->list.size() - 1 == 2, ArgumentException(
+                                                2, list_ast->list.size() - 1));
 
                 std::shared_ptr<MalEnv> new_repl_env(new MalEnv(env));
                 std::shared_ptr<AstTokenList> bindings;
 
                 bindings = as_type<AstTokenList>(list_ast->list[1]);
-                check_map(bindings->list.size() % 2);
+                map_assert(bindings->list.size() % 2 == 0, MapException());
 
                 for(auto it=std::begin(bindings->list); it != std::end(bindings->list);){
 
-                    check_token((*it)->type != SYMBOL, SYMBOL, (*it)->type);
                     std::string key = as_type<AstTokenSymbol>(*(it++))->name;
                     new_repl_env->set(key, eval(*(it++), new_repl_env));
                 }
@@ -202,7 +201,8 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<Ma
             } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
                     as_type<AstTokenSymbol>(list_ast->list[0])->name == "do") {
 
-                check_arguments(list_ast->list.size() < 2, "1", std::to_string(list_ast->list.size() - 1));
+                arg_assert(list_ast->list.size() >= 2, ArgumentException(
+                                            1, list_ast->list.size() - 1));
 
                 for(int i=1; i < (int) list_ast->list.size() - 1; i++){
                     eval(list_ast->list[i], env);
@@ -214,7 +214,8 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<Ma
             } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
                     as_type<AstTokenSymbol>(list_ast->list[0])->name == "if") {
 
-                check_arguments(list_ast->list.size() < 3, "2", std::to_string(list_ast->list.size() - 1));
+                arg_assert(list_ast->list.size() >= 3, ArgumentException(
+                                        2, (list_ast->list.size() - 1)));
 
                 std::shared_ptr<AstToken> condition;
 
@@ -238,9 +239,8 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<Ma
             } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
                     as_type<AstTokenSymbol>(list_ast->list[0])->name == "fn*") {
 
-                check_arguments(list_ast->list.size() < 3, "2", std::to_string(list_ast->list.size() - 1));
-                check_token(list_ast->list[1]->type != LIST && list_ast->list[1]->type != VECTOR,
-                                                                LIST, list_ast->list[1]->type);
+                arg_assert(list_ast->list.size() >= 3, ArgumentException(
+                                            2, list_ast->list.size() - 1));
 
                 ret = std::shared_ptr<AstTokenFunction>(new AstTokenFunction(env, list_ast->list[1],
                                                                         list_ast->list[2], false));
@@ -249,7 +249,9 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<Ma
             } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
                     as_type<AstTokenSymbol>(list_ast->list[0])->name == "quote") {
 
-                check_arguments(list_ast->list.size() != 2, "1", std::to_string(list_ast->list.size() - 1));
+                arg_assert(list_ast->list.size() == 2, ArgumentException(
+                                        1, (list_ast->list.size() - 1)));
+
                 ret = list_ast->list[1];
                 loop = false;
                 continue;
@@ -257,15 +259,17 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<Ma
             } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
                     as_type<AstTokenSymbol>(list_ast->list[0])->name == "quasiquote") {
 
-                check_arguments(list_ast->list.size() < 2, "1", std::to_string(list_ast->list.size() - 1));
+                arg_assert(list_ast->list.size() >= 2, ArgumentException(
+                                            1, list_ast->list.size() - 1));
+
                 token = quasiquote(list_ast->list[1], 0);
                 continue;
 
             } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
                     as_type<AstTokenSymbol>(list_ast->list[0])->name == "defmacro!") {
 
-                check_arguments(list_ast->list.size() - 1 != 2, "2", std::to_string(list_ast->list.size() - 1));
-                check_token(list_ast->list[1]->type != SYMBOL, SYMBOL, list_ast->list[1]->type);
+                arg_assert(list_ast->list.size() - 1 == 2, ArgumentException(
+                                                2, list_ast->list.size() - 1));
 
                 std::string key_token = as_type<AstTokenSymbol>(list_ast->list[1])->name;
                 std::shared_ptr<AstToken> value = eval(list_ast->list[2], env);

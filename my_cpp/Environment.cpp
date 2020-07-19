@@ -9,7 +9,7 @@ MalEnv::find(const std::string& key) {
     if(data.find(key) != end(data))
         return data.find(key)->second;
 
-    check_valid_symbol(outer == nullptr, "'%s' not found.", key);
+    sym_assert(outer != nullptr, SymException(key));
 
     return outer->find(key);
 }
@@ -30,8 +30,8 @@ MalEnv::get(const std::string& key) {
 void
 MalEnv::set_bindings(const std::vector<std::string>& params, std::string largs, MalArgs init, MalArgs end) {
 
-    check_arguments(end - init < (int) params.size() - (int) !largs.empty(),
-            std::to_string(params.size() - (int) !largs.empty()), std::to_string(end - init));
+    arg_assert(end - init >= (int) params.size() - (int) !largs.empty(),
+            ArgumentException(params.size() - (int) !largs.empty(), end - init));
 
     for(auto it = std::begin(params); it != std::end(params); it++) {
 
