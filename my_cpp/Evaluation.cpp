@@ -16,7 +16,9 @@ std::shared_ptr<AstToken> eval_ast (std::shared_ptr<AstToken> ast, std::shared_p
             symbol = symbol_ast->name;
 
             ret = repl_env->get(symbol);
-            break;
+
+            if(ret != nullptr) break;
+            throw SymException(symbol);
         }
         case LIST: {
             std::shared_ptr<AstTokenList> list_ast;
@@ -135,11 +137,11 @@ bool is_macro_call(std::shared_ptr<AstToken> ast, std::shared_ptr<MalEnv> repl_e
         std::shared_ptr<AstTokenList> list_ast;
         list_ast = as_type<AstTokenList>(ast);
 
-        if(list_ast->list[0]->type == SYMBOL) {
+        if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL) {
             std::string symbol = as_type<AstTokenSymbol>(list_ast->list[0])->name;
             std::shared_ptr<AstToken>raw_ast = repl_env->get(symbol);
 
-            if(raw_ast->type == FUNCTION) {
+            if(raw_ast != nullptr && raw_ast->type == FUNCTION) {
                 std::shared_ptr<AstTokenFunction> fun_ast;
                 fun_ast = as_type<AstTokenFunction>(raw_ast);
 
@@ -151,6 +153,30 @@ bool is_macro_call(std::shared_ptr<AstToken> ast, std::shared_ptr<MalEnv> repl_e
     return false;
 }
 
+std::shared_ptr<AstToken> macroexpand(std::shared_ptr<AstToken> ast, std::shared_ptr<MalEnv> repl_env) {
+
+    std::shared_ptr<AstToken> ret = ast;
+
+    while(is_macro_call(ret, repl_env)) {
+        //std::cerr  << "Error" << std::endl;
+
+        std::shared_ptr<AstTokenList> list_ast = as_type<AstTokenList>(ret);
+        std::string symbol = as_type<AstTokenSymbol>(list_ast->list[0])->name;
+        std::shared_ptr<AstTokenFunction> fun_ast = as_type<AstTokenFunction>(repl_env->get(symbol));
+
+        if(fun_ast == nullptr) throw SymException(symbol);
+
+        std::shared_ptr<MalEnv> new_repl_env = std::shared_ptr<MalEnv>(
+                                            new MalEnv(fun_ast->scope));
+
+        new_repl_env->set_bindings(fun_ast->params, fun_ast->larg,
+                ++(std::cbegin(list_ast->list)), std::cend(list_ast->list));
+        ret = eval(fun_ast->function, new_repl_env);
+    }
+
+    return ret;
+}
+
 std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<MalEnv> repl_env) {
 
     bool loop = true;
@@ -160,6 +186,9 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<Ma
     token = ast;
 
     while(loop){
+
+        token = macroexpand(token, repl_env);
+
         if (token->type == LIST) {
 
             std::shared_ptr<AstTokenList> list_ast = as_type<AstTokenList>(token);
@@ -279,11 +308,17 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<Ma
                     fun_ast->is_macro = true;
                     env->set(key_token, value);
                 } else {
-                    throw std::string("Macro error");
+                    throw MacroException(value->type);
                 }
 
                 ret = value;
                 loop = false;
+
+            } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
+                    as_type<AstTokenSymbol>(list_ast->list[0])->name == "macroexpand") {
+                arg_assert(list_ast->list.size() == 2, ArgumentException(1, list_ast->list.size()-1));
+
+                return macroexpand(list_ast->list[1], repl_env);
 
             } else {
                 list_ast = as_type<AstTokenList> (eval_ast(token, env));

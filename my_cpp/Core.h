@@ -52,4 +52,8 @@ std::shared_ptr<AstToken> swapOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> consOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> concatOperator(MalArgs args, MalArgs end);
 
+std::shared_ptr<AstToken> nthOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> firstOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> restOperator(MalArgs args, MalArgs end);
+
 #endif //_CORE_H_

@@ -60,6 +60,23 @@ class UncException : public std::exception {
         UncException(tokenType _a, tokenType _b) : a(_a), b(_b) {};
 };
 
+class MacroException : public std::exception {
+    private:
+        tokenType expected;
+    public:
+        const char* what() const noexcept;
+        MacroException(tokenType _expected) : expected(_expected) {};
+};
+
+class OutRangeException : public std::exception {
+    private:
+        int index;
+        int size;
+    public:
+        const char* what() const noexcept;
+        OutRangeException(int _index, int _size) : index(_index), size(_size) {};
+};
+
 void arg_assert(bool expr, ArgumentException e);
 void map_assert(bool expr, MapException e);
 void sym_assert(bool expr, SymException e);

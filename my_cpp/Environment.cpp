@@ -9,7 +9,8 @@ MalEnv::find(const std::string& key) {
     if(data.find(key) != end(data))
         return data.find(key)->second;
 
-    sym_assert(outer != nullptr, SymException(key));
+    if(outer == nullptr)
+        return std::shared_ptr<AstToken>(nullptr);
 
     return outer->find(key);
 }

@@ -31,6 +31,10 @@ void start_outer_env(std::shared_ptr<MalEnv> repl_env) {
     repl_env->set("swap!", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("swap!", &swapOperator)));
     repl_env->set("cons", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("cons", &consOperator)));
     repl_env->set("concat", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("concat", &concatOperator)));
+    repl_env->set("nth", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("nth", &nthOperator)));
+    repl_env->set("first", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("first", &firstOperator)));
+    repl_env->set("rest", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("rest", &restOperator)));
+
     outer_env = repl_env;
     return;
 }
@@ -404,3 +408,52 @@ std::shared_ptr<AstToken> concatOperator(MalArgs args, MalArgs end) {
     }
     return list_ast;
 }
+
+std::shared_ptr<AstToken> nthOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args == 2, ArgumentException(2, end - args));
+
+    std::shared_ptr<AstTokenList> list_ast;
+
+    list_ast = as_type<AstTokenList>(*args++);
+    int idx = as_type<AstTokenNumber>(*args)->value;
+
+    if(idx < (int) list_ast->list.size()){
+        return list_ast->list[idx];
+    }
+
+    throw OutRangeException(idx, list_ast->list.size());
+}
+
+std::shared_ptr<AstToken> firstOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    if((*args)->type ==  NIL )
+        return std::shared_ptr<AstTokenNil>(new AstTokenNil);
+
+    std::shared_ptr<AstTokenList> list_ast;
+    list_ast = as_type<AstTokenList>(*args);
+
+    if(list_ast->list.size() == 0){
+        return std::shared_ptr<AstTokenNil>(new AstTokenNil);
+    }
+
+    return list_ast->list[0];
+}
+
+
+std::shared_ptr<AstToken> restOperator(MalArgs args, MalArgs end) {
+
+    std::shared_ptr<AstTokenList> new_list_ast(new AstTokenList);
+    
+    if((*args)->type == NIL)
+        return new_list_ast;
+
+    std::shared_ptr<AstTokenList> list_ast = as_type<AstTokenList>(*args);
+    std::copy(std::begin(list_ast->list)+1, std::end(list_ast->list),
+                            std::back_inserter(new_list_ast->list));
+
+    return new_list_ast;
+}
+

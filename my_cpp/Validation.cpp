@@ -13,8 +13,7 @@ TokenException::what() const noexcept {
     char* error = (char*)malloc(strlen(_error) + strlen(token_to_str[got]) +
                                         strlen(token_to_str[expected] + 1));
     sprintf(error, _error, token_to_str[got], token_to_str[expected]);
-
-    return error;
+return error;
 }
 
 const char*
@@ -69,6 +68,28 @@ UncException::what() const noexcept {
 
     return error;
 };
+
+const char*
+MacroException::what() const noexcept {
+
+    const char* _error = "Error: Macro erro expected type FUNCTION got %s";
+
+    char* error = (char*)malloc(strlen(_error) + strlen(token_to_str[expected]) + 1);
+    sprintf(error, _error, token_to_str[expected]);
+
+    return error;
+};
+
+const char*
+OutRangeException::what() const noexcept {
+
+    const char* _error = "Error: Out of range index %i out of range (list size %i)";
+
+    char* error = (char*)malloc(strlen(_error) + 11 + 11 + 1);
+    sprintf(error, _error, index, size);
+
+    return error;
+}
 
 void arg_assert(bool expr, ArgumentException e){
     if(expr) return;
