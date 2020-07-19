@@ -4,7 +4,6 @@
 #include<iostream>
 #include<stdio.h>
 #include<string.h>
-
 #include"BasicTypes.h"
 
 class TokenException : public std::exception {
@@ -48,14 +47,22 @@ class BalException : public std::exception {
         std::string expected;
     public:
         const char* what() const noexcept;
-        BalException(std::string _expected) : expected(_expected) {};
+        BalException(std::string _expected)
+                : expected(_expected) {};
+};
+
+class UncException : public std::exception {
+    private:
+        tokenType a;
+        tokenType b;
+    public:
+        const char* what() const noexcept;
+        UncException(tokenType _a, tokenType _b) : a(_a), b(_b) {};
 };
 
 void arg_assert(bool expr, ArgumentException e);
 void map_assert(bool expr, MapException e);
 void sym_assert(bool expr, SymException e);
 void bal_assert(bool expr, BalException e);
-
-void unimplemented_comparison(const tokenType& token_a, const tokenType& token_b);
 
 #endif //VALIDATION_H_

@@ -58,6 +58,18 @@ BalException::what() const noexcept {
     return error;
 }
 
+const char*
+UncException::what() const noexcept {
+
+    const char* _error = "Error: Unimplemented comparison between %s and %s";
+
+    char* error = (char*)malloc(strlen(_error) + strlen(token_to_str[a]) +
+                                            strlen(token_to_str[b]) + 1);
+    sprintf(error, _error, token_to_str[a], token_to_str[b]);
+
+    return error;
+};
+
 void arg_assert(bool expr, ArgumentException e){
     if(expr) return;
     throw e;
@@ -76,19 +88,5 @@ void sym_assert(bool expr, SymException e){
 void bal_assert(bool expr, BalException e) {
     if(expr) return;
     throw e;
-}
-
-void unimplemented_comparison(const tokenType& token_a, const tokenType& token_b) {
-
-    std::string error = "Error: Unimplemented comparison between %s and %s";
-    std::string str_a(token_to_str[token_a]);
-    std::string str_b(token_to_str[token_b]);
-
-    char* aux_message = new char[error.length() + str_a.length() + str_b.length() + 1];
-
-    sprintf(aux_message, error.c_str(), str_a.c_str(), str_b.c_str());
-    std::string error_message(std::move(aux_message));
-
-    throw error_message;
 }
 

@@ -137,8 +137,7 @@ bool equal(std::shared_ptr<AstToken> a, std::shared_ptr<AstToken> b) {
         return false;
     }
 
-    unimplemented_comparison(a->type, b->type);
-    return false;
+    throw UncException(a->type, b->type);
 }
 
 std::shared_ptr<AstToken> eqOperator(MalArgs args, MalArgs end) {

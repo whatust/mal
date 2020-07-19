@@ -9,14 +9,11 @@
 #include"Types.h"
 #include"Validation.h"
 
-using std::string;
-using std::vector;
-
 class Reader {
 
     public:
-        string next();
-        string peek();
+        std::string next();
+        std::string peek();
         Reader(StringVector&& tokens);
         ~Reader();
         void print_tokens() const;
@@ -24,9 +21,9 @@ class Reader {
         bool is_eof() const;
 
     private:
-        vector<string> tokens;
-        vector<string>::iterator s_iter;
-        vector<string>::iterator s_end;
+        std::vector<std::string> tokens;
+        std::vector<std::string>::iterator s_iter;
+        std::vector<std::string>::iterator s_end;
 
         void next_token();
 };

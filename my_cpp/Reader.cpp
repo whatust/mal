@@ -1,7 +1,5 @@
 #include"Reader.h"
 
-using std::regex_constants::match_continuous;
-
 static const std::regex WHITESPACES_REGEX("^[\\s,]+|^;.*");
 static const std::regex NUMBER_REGEX("^[-+]?[0-9]+");
 static const std::regex TOKEN_REGEX[] = {
@@ -47,7 +45,7 @@ StringVector tokenize(const std::string& input) {
     for(auto iter = std::begin(input); iter != std::end(input);) {
 
         std::smatch match;
-        auto flag = match_continuous;
+        auto flag = std::regex_constants::match_continuous;
 
         // Remove whitespaces
         while(std::regex_search(iter, std::end(input), match, WHITESPACES_REGEX, flag)) {
@@ -63,7 +61,7 @@ StringVector tokenize(const std::string& input) {
         for(auto &regex : TOKEN_REGEX) {
 
             std::smatch match;
-            auto flag = match_continuous;
+            auto flag = std::regex_constants::match_continuous;
 
             if(!std::regex_search(iter, std::end(input), match, regex, flag)) continue;
             if(match.position(0) != 0) continue;
@@ -202,7 +200,7 @@ AstTokenPtr read_atom(Reader& reader) {
         default:
 
             std::smatch match;
-            auto flag = match_continuous;
+            auto flag = std::regex_constants::match_continuous;
 
             if (regex_search(token, match, NUMBER_REGEX, flag)) {
                 ast = new AstTokenNumber(token);
