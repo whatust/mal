@@ -10,7 +10,7 @@
 typedef std::vector<std::string> StringVector;
 enum tokenType { SYMBOL, NUMBER, LIST, VECTOR,
                 HASH_MAP, OPERATOR, BOOL, FUNCTION, NIL, STRING,
-                KEYWORD, ATOM };
+                KEYWORD, ATOM, EXCEPTION };
 
 class AstToken {
     public:

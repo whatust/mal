@@ -1,7 +1,5 @@
 #include"Core.h"
 
-std::shared_ptr<MalEnv> outer_env;
-
 void start_outer_env(std::shared_ptr<MalEnv> repl_env) {
 
     repl_env->set("+", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("+", &addOperator)));
@@ -34,6 +32,7 @@ void start_outer_env(std::shared_ptr<MalEnv> repl_env) {
     repl_env->set("nth", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("nth", &nthOperator)));
     repl_env->set("first", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("first", &firstOperator)));
     repl_env->set("rest", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("rest", &restOperator)));
+    repl_env->set("throw", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("throw", &throwOperator)));
 
     outer_env = repl_env;
     return;
@@ -446,7 +445,7 @@ std::shared_ptr<AstToken> firstOperator(MalArgs args, MalArgs end) {
 std::shared_ptr<AstToken> restOperator(MalArgs args, MalArgs end) {
 
     std::shared_ptr<AstTokenList> new_list_ast(new AstTokenList);
-    
+
     if((*args)->type == NIL)
         return new_list_ast;
 
@@ -455,5 +454,14 @@ std::shared_ptr<AstToken> restOperator(MalArgs args, MalArgs end) {
                             std::back_inserter(new_list_ast->list));
 
     return new_list_ast;
+}
+
+std::shared_ptr<AstToken> throwOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    std::shared_ptr<AstTokenException> exception(new AstTokenException(args[0]));
+
+    throw exception;
 }
 

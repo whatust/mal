@@ -49,6 +49,13 @@ class AstTokenNil : public AstToken {
         AstTokenNil();
 };
 
+class AstTokenException : public AstToken {
+    public:
+        std::shared_ptr<AstToken> ast;
+        const static tokenType ctype = EXCEPTION;
+        AstTokenException(std::shared_ptr<AstToken> _ast);
+};
+
 template <class T>
 std::shared_ptr<T> as_type(std::shared_ptr<AstToken> ast) {
 

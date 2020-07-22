@@ -79,3 +79,6 @@ AstTokenAtom::AstTokenAtom(std::shared_ptr<AstToken> _object)
 AstTokenNil::AstTokenNil()
 : AstToken(NIL) {};
 
+AstTokenException::AstTokenException(std::shared_ptr<AstToken> _ast)
+: AstToken(EXCEPTION) { ast = _ast; };
+

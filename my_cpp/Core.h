@@ -56,4 +56,6 @@ std::shared_ptr<AstToken> nthOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> firstOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> restOperator(MalArgs args, MalArgs end);
 
+std::shared_ptr<AstToken> throwOperator(MalArgs args, MalArgs end);
+
 #endif //_CORE_H_

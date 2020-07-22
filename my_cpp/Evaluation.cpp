@@ -320,6 +320,68 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<Ma
 
                 return macroexpand(list_ast->list[1], repl_env);
 
+            } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
+                    as_type<AstTokenSymbol>(list_ast->list[0])->name == "try*") {
+
+                arg_assert(list_ast->list.size() == 3, ArgumentException(2, list_ast->list.size()-1));
+
+                try{
+                    ret = eval(list_ast->list[1], repl_env);
+                } catch(std::shared_ptr<AstTokenException> e) {
+
+                    std::shared_ptr<AstTokenList> catch_list_ast;
+                    catch_list_ast = as_type<AstTokenList>(list_ast->list[2]);
+
+                    std::shared_ptr<AstTokenSymbol> catch_ast;
+                    catch_ast = as_type<AstTokenSymbol>(catch_list_ast->list[0]);
+
+                    if(catch_ast->name == "catch*") {
+
+                        std::vector<std::string> excp_name;
+                        excp_name.push_back(as_type<AstTokenSymbol>(catch_list_ast->list[1])->name);
+
+                        std::shared_ptr<MalEnv> new_repl_env = std::shared_ptr<MalEnv>(new MalEnv(outer_env));
+
+                        std::vector<std::shared_ptr<AstToken>> params;
+                        params.push_back(eval(e->ast, repl_env));
+
+                        new_repl_env->set_bindings(excp_name, std::string(""),
+                                    std::cbegin(params), std::cend(params));
+
+                        ret = eval(catch_list_ast->list[2],new_repl_env);
+                    }else {
+                        throw TryException();
+                    }
+
+                } catch(std::exception& e) {
+
+                    std::string error(e.what());
+
+                    std::shared_ptr<AstTokenList> catch_list_ast;
+                    catch_list_ast = as_type<AstTokenList>(list_ast->list[2]);
+
+                    std::shared_ptr<AstTokenSymbol> catch_ast;
+                    catch_ast = as_type<AstTokenSymbol>(catch_list_ast->list[0]);
+
+                    if(catch_ast->name == "catch*") {
+
+                        std::vector<std::string> excp_name;
+                        excp_name.push_back(as_type<AstTokenSymbol>(catch_list_ast->list[1])->name);
+
+                        std::shared_ptr<MalEnv> new_repl_env = std::shared_ptr<MalEnv>(new MalEnv(outer_env));
+
+                        std::vector<std::shared_ptr<AstToken>> params;
+                        params.push_back(std::shared_ptr<AstTokenString>(new AstTokenString(error)));
+
+                        new_repl_env->set_bindings(excp_name, std::string(""),
+                                    std::cbegin(params), std::cend(params));
+
+                        ret = eval(catch_list_ast->list[2],new_repl_env);
+                    }else {
+                        throw TryException();
+                    }
+                }
+
             } else {
                 list_ast = as_type<AstTokenList> (eval_ast(token, env));
 

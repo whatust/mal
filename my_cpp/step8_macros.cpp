@@ -46,22 +46,6 @@ int main(int argc, char* argv[]) {
             catch(EmptyInput&) {
                 continue;
             }
-            catch(std::string& error) {
-                std::cerr << error << std::endl;
-                continue;
-            }
-            catch(TokenException& error){
-                std::cerr << error.what() << std::endl;
-                continue;
-            }
-            catch(ArgumentException& error){
-                std::cerr << error.what() << std::endl;
-                continue;
-            }
-            catch(SymException& error){
-                std::cerr << error.what() << std::endl;
-                continue;
-            }
             catch(std::exception& error){
                 std::cerr << error.what() << std::endl;
                 continue;

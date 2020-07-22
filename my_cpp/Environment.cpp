@@ -1,5 +1,7 @@
 #include "Environment.h"
 
+std::shared_ptr<MalEnv> outer_env;
+
 std::shared_ptr<AstToken>
 MalEnv::find(const std::string& key) {
 

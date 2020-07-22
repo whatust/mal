@@ -31,6 +31,7 @@ int main(int argc, char* argv[]) {
     rep(std::string("(def! not(fn* (a) (if a false true)))"), repl_env);
     rep(std::string("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \"\nnil)\")))))"), repl_env);
     rep(std::string("(def! *ARGV*(" + args + "))"), repl_env);
+    rep(std::string("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))"), repl_env);
 
     if(filename.compare("") != 0) {
         rep(std::string("(load-file \"" + filename + "\")"), repl_env);
@@ -43,6 +44,10 @@ int main(int argc, char* argv[]) {
                 out = rep(input, repl_env);
             }
             catch(EmptyInput&) {
+                continue;
+            }
+            catch(std::shared_ptr<AstTokenException>& error) {
+                std::cerr << pr_str(error, true) << std::endl;
                 continue;
             }
             catch(std::exception& error){

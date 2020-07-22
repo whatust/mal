@@ -77,6 +77,12 @@ class OutRangeException : public std::exception {
         OutRangeException(int _index, int _size) : index(_index), size(_size) {};
 };
 
+class TryException : public std::exception {
+    private:
+    public:
+        const char* what() const noexcept;
+};
+
 void arg_assert(bool expr, ArgumentException e);
 void map_assert(bool expr, MapException e);
 void sym_assert(bool expr, SymException e);

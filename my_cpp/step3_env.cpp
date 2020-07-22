@@ -33,28 +33,28 @@ int main(int argc, char* argv[]) {
         catch(EmptyInput&) {
             continue;
         }
-        catch(std::string& error) {
-            std::cerr << error << std::endl;
+        catch(std::exception& error){
+            std::cerr << error.what() << std::endl;
             continue;
         }
         std::cout << out << std::endl;
-    }
-    return 0;
+}
+return 0;
 }
 
 std::string rep(const std::string& input, std::shared_ptr<MalEnv>repl_env) {
-        return PRINT(EVAL(READ(input), repl_env));
+    return PRINT(EVAL(READ(input), repl_env));
 }
 
 std::shared_ptr<AstToken> READ(const std::string& input) {
-    return read_str(input);
+return read_str(input);
 }
 
 std::shared_ptr<AstToken> EVAL(std::shared_ptr<AstToken> ast, std::shared_ptr<MalEnv> repl_env) {
-    return eval(ast,repl_env);
+return eval(ast,repl_env);
 }
 
 std::string PRINT(std::shared_ptr<AstToken> ast) {
-    return pr_str(ast, false);
+return pr_str(ast, false);
 }
 

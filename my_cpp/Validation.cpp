@@ -3,7 +3,7 @@
 const char *token_to_str[] = { "SYMBOL", "NUMBER", "LIST",
                                 "VECTOR", "HASH_MAP", "OPERATOR",
                                 "BOOL", "FUNCTION", "NIL", "STRING",
-                                "KEYWORD", "ATOM" };
+                                "KEYWORD", "ATOM", "EXCEPTION" };
 
 const char*
 TokenException::what() const noexcept {
@@ -38,7 +38,7 @@ MapException::what() const noexcept {
 const char*
 SymException::what() const noexcept {
 
-    const char* _error = "Error: Symbol %s not found";
+    const char* _error = "'%s' not found";
 
     char* error = (char*)malloc(strlen(_error) + symbol.length() + 1);
     sprintf(error, _error, symbol.c_str());
@@ -87,6 +87,14 @@ OutRangeException::what() const noexcept {
 
     char* error = (char*)malloc(strlen(_error) + 11 + 11 + 1);
     sprintf(error, _error, index, size);
+
+    return error;
+}
+
+const char*
+TryException::what() const noexcept {
+
+    const char* error = "Error: Try expression has to follow format (try* A (catch* B C))";
 
     return error;
 }

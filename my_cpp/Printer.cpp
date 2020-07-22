@@ -152,7 +152,12 @@ std::string pr_str(std::shared_ptr<AstToken> ast, bool print_readably){
                 std::shared_ptr<AstTokenOperator> op_ast;
                 op_ast = as_type<AstTokenOperator>(ast);
                 ret = op_ast->name;
-                //throw std::string("Unexpected Operator");
+           }
+           case EXCEPTION: {
+                std::shared_ptr<AstTokenException> excp_ast;
+                excp_ast = as_type<AstTokenException>(ast);
+                ret = "Exception: " + pr_str(excp_ast->ast, print_readably);
+                break;
            }
         }
     }

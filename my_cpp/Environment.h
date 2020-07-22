@@ -27,4 +27,6 @@ public:
     void print();
 };
 
+extern std::shared_ptr<MalEnv> outer_env;
+
 #endif //ENVIRONMENT_H_
