@@ -6,15 +6,6 @@ AstTokenSymbol::AstTokenSymbol(const std::string& _name)
 : AstToken(SYMBOL)
 , name(_name){};
 
-AstTokenOperator::AstTokenOperator(std::string _name, MalFunction _op)
-: AstToken(OPERATOR)
-, op(_op)
-, name(_name){};
-
-std::shared_ptr<AstToken> AstTokenOperator::operator()(MalArgs args, MalArgs end) {
-    return op(args, end);
-};
-
 AstTokenNumber::AstTokenNumber(const std::string& _number)
 : AstToken(NUMBER)
 , value(stoi(_number)){};

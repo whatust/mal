@@ -20,7 +20,6 @@ class AstToken {
 
 typedef AstToken* AstTokenPtr;
 typedef std::vector<std::shared_ptr<AstToken>>::const_iterator MalArgs;
-typedef std::function<std::shared_ptr<AstToken>(MalArgs, MalArgs)> MalFunction;
 
 class EmptyInput : public std::exception {};
 
@@ -29,15 +28,6 @@ class AstTokenSymbol : public AstToken {
         const static tokenType ctype = SYMBOL;
         std::string name;
         AstTokenSymbol(const std::string& _name);
-};
-
-class AstTokenOperator : public AstToken {
-    public:
-        const static tokenType ctype = OPERATOR;
-        MalFunction op;
-        std::string name;
-        AstTokenOperator(std::string _name, MalFunction _op);
-        std::shared_ptr<AstToken> operator()(MalArgs args, MalArgs end);
 };
 
 class AstTokenNumber : public AstToken {

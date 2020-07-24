@@ -1,5 +1,14 @@
 #include"Types.h"
 
+AstTokenOperator::AstTokenOperator(std::string _name, MalFunction _op)
+: AstToken(OPERATOR)
+, op(_op)
+, name(_name){};
+
+std::shared_ptr<AstToken> AstTokenOperator::operator()(MalArgs args, MalArgs end, std::shared_ptr<MalEnv> repl_env) {
+    return op(args, end, repl_env);
+};
+
 AstTokenFunction::AstTokenFunction(std::shared_ptr<MalEnv> _scope, std::shared_ptr<AstToken>_params,
                                             std::shared_ptr<AstToken> _function, bool _macro)
 : AstToken(FUNCTION) , function(_function) , is_macro(_macro) {
