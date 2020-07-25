@@ -43,6 +43,8 @@ void start_outer_env(std::shared_ptr<MalEnv> repl_env) {
     repl_env->set("nil?", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("nil?", &nilqOperator)));
 
     repl_env->set("symbol", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("symbol", &symbolOperator)));
+    repl_env->set("keyword", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("keyword", &keywordOperator)));
+    repl_env->set("keyword?", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("keyword?", &keywordqOperator)));
 
     outer_env = repl_env;
     return;
@@ -612,4 +614,20 @@ std::shared_ptr<AstToken> symbolOperator(MalArgs args, MalArgs end) {
     return std::shared_ptr<AstTokenSymbol> (new AstTokenSymbol(str_ast->value));
 }
 
+std::shared_ptr<AstToken> keywordOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    std::shared_ptr<AstTokenString> std_ast;
+    std_ast = as_type<AstTokenString>(args[0]);
+
+    return std::shared_ptr<AstTokenKeyword> (new AstTokenKeyword(std_ast->value));
+}
+
+std::shared_ptr<AstToken> keywordqOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    return std::shared_ptr<AstTokenBool> (new AstTokenBool(args[0]->type == KEYWORD));
+}
 

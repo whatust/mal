@@ -67,5 +67,7 @@ std::shared_ptr<AstToken> trueqOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> nilqOperator(MalArgs args, MalArgs end);
 
 std::shared_ptr<AstToken> symbolOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> keywordOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> keywordqOperator(MalArgs args, MalArgs end);
 
 #endif //_CORE_H_
