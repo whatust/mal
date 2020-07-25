@@ -61,4 +61,11 @@ std::shared_ptr<AstToken> throwOperator(MalArgs args, MalArgs end, std::shared_p
 std::shared_ptr<AstToken> applyOperator(MalArgs args, MalArgs end, std::shared_ptr<MalEnv> repl_env);
 std::shared_ptr<AstToken> mapOperator(MalArgs args, MalArgs end, std::shared_ptr<MalEnv> repl_env);
 
+std::shared_ptr<AstToken> symbolqOperator(MalArgs args, MalArgs end, std::shared_ptr<MalEnv> repl_env);
+std::shared_ptr<AstToken> falseqOperator(MalArgs args, MalArgs end, std::shared_ptr<MalEnv> repl_env);
+std::shared_ptr<AstToken> trueqOperator(MalArgs args, MalArgs end, std::shared_ptr<MalEnv> repl_env);
+std::shared_ptr<AstToken> nilqOperator(MalArgs args, MalArgs end, std::shared_ptr<MalEnv> repl_env);
+
+std::shared_ptr<AstToken> symbolOperator(MalArgs args, MalArgs end, std::shared_ptr<MalEnv> repl_env);
+
 #endif //_CORE_H_

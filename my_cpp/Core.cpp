@@ -37,6 +37,13 @@ void start_outer_env(std::shared_ptr<MalEnv> repl_env) {
     repl_env->set("apply", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("apply", &applyOperator)));
     repl_env->set("map", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("map", &mapOperator)));
 
+    repl_env->set("symbol?", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("symbol?", &symbolqOperator)));
+    repl_env->set("false?", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("false?", &falseqOperator)));
+    repl_env->set("true?", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("true?", &trueqOperator)));
+    repl_env->set("nil?", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("nil?", &nilqOperator)));
+
+    repl_env->set("symbol", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("symbol", &symbolOperator)));
+
     outer_env = repl_env;
     return;
 }
@@ -463,7 +470,8 @@ std::shared_ptr<AstToken> throwOperator(MalArgs args, MalArgs end, std::shared_p
 
     arg_assert(end - args == 1, ArgumentException(1, end - args));
 
-    std::shared_ptr<AstTokenException> exception(new AstTokenException(eval(args[0], repl_env)));
+    //std::shared_ptr<AstTokenException> exception(new AstTokenException(eval(args[0], repl_env)));
+    std::shared_ptr<AstTokenException> exception(new AstTokenException(args[0]));
 
     throw exception;
 }
@@ -472,7 +480,9 @@ std::shared_ptr<AstToken> applyOperator(MalArgs args, MalArgs end, std::shared_p
 
     arg_assert(end - args >= 2,  ArgumentException(2, end - args));
 
+    std::shared_ptr<AstToken> ret;
     std::shared_ptr<AstTokenList> list_ast(new AstTokenList());
+    std::shared_ptr<AstToken> holder_ast = *args++;
 
     while(args != end) {
         if((*args)->type == LIST || (*args)->type == VECTOR) {
@@ -489,28 +499,120 @@ std::shared_ptr<AstToken> applyOperator(MalArgs args, MalArgs end, std::shared_p
         args++;
     }
 
-    return eval(list_ast, repl_env);
+    if(holder_ast->type == FUNCTION){
+
+        std::shared_ptr<AstTokenFunction> fun_ast;
+        //fun_ast = as_type<AstTokenFunction>(eval(holder_ast, repl_env));
+        fun_ast = as_type<AstTokenFunction>(holder_ast);
+
+        std::shared_ptr<MalEnv> new_repl_env = std::shared_ptr<MalEnv>(
+                                            new MalEnv(fun_ast->scope));
+        new_repl_env->set_bindings(fun_ast->params, fun_ast->larg,
+                std::cbegin(list_ast->list), std::cend(list_ast->list));
+
+        ret = eval(fun_ast->function, new_repl_env);
+
+    } else if(holder_ast->type == OPERATOR) {
+
+        std::shared_ptr<AstTokenOperator> op_ast;
+        //op_ast = as_type<AstTokenOperator>(eval(holder_ast, repl_env));
+        op_ast = as_type<AstTokenOperator>(holder_ast);
+
+        ret = (*op_ast) (std::cbegin(list_ast->list), std::cend(list_ast->list), repl_env);
+    } else {
+        throw TokenException(FUNCTION, holder_ast->type);
+    }
+
+    return ret;
 }
 
 std::shared_ptr<AstToken> mapOperator(MalArgs args, MalArgs end, std::shared_ptr<MalEnv> repl_env) {
 
     arg_assert(end - args == 2, ArgumentException(2, end - args));
 
-    std::shared_ptr<AstTokenList> funlist_ast (new AstTokenList);
-    funlist_ast->list.push_back(*args++);
-
     std::shared_ptr<AstTokenList> list_ast;
-    list_ast = as_type<AstTokenList>(*args);
+    std::shared_ptr<AstTokenList> new_list_ast(new AstTokenList);
 
-    std::shared_ptr<AstTokenList> new_list_ast (new AstTokenList);
+    if(args[0]->type == FUNCTION) {
 
-    for(auto arg :  list_ast->list){
+        std::shared_ptr<AstTokenFunction> fun_ast;
+        fun_ast = as_type<AstTokenFunction>(*args++);
 
-        funlist_ast->list.push_back(arg);
-        new_list_ast->list.push_back(eval(funlist_ast, repl_env));
-        funlist_ast->list.pop_back();
+        std::shared_ptr<MalEnv> new_repl_env = std::shared_ptr<MalEnv>(
+                                            new MalEnv(fun_ast->scope));
+
+        list_ast = as_type<AstTokenList>(*args);
+
+        for(auto it = std::cbegin(list_ast->list); it != std::cend(list_ast->list); it++) {
+
+            new_repl_env->set_bindings(fun_ast->params, fun_ast->larg, it, it + 1);
+            new_list_ast->list.push_back(eval(fun_ast->function, new_repl_env));
+        }
+    } else if(args[0]->type == OPERATOR) {
+
+        std::shared_ptr<AstTokenOperator> op_ast;
+        op_ast = as_type<AstTokenOperator> (*args++);
+
+        list_ast = as_type<AstTokenList>(*args);
+
+        for(auto it = std::cbegin(list_ast->list); it != std::cend(list_ast->list); it++) {
+            new_list_ast->list.push_back((*op_ast)(it, it + 1, repl_env));
+        }
+    } else {
+        throw TokenException(FUNCTION, args[0]->type);
     }
 
     return new_list_ast;
 }
+
+std::shared_ptr<AstToken> symbolqOperator(MalArgs args, MalArgs end, std::shared_ptr<MalEnv> repl_env) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    return std::shared_ptr<AstTokenBool> (new AstTokenBool(args[0]->type == SYMBOL));
+}
+
+std::shared_ptr<AstToken> falseqOperator(MalArgs args, MalArgs end, std::shared_ptr<MalEnv> repl_env) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    if(args[0]->type != BOOL)
+        return std::shared_ptr<AstTokenBool> (new AstTokenBool(false));
+
+    std::shared_ptr<AstTokenBool> bool_ast;
+    bool_ast = as_type<AstTokenBool>(args[0]);
+
+    return std::shared_ptr<AstTokenBool> (new AstTokenBool(!bool_ast->value));
+}
+
+std::shared_ptr<AstToken> trueqOperator(MalArgs args, MalArgs end, std::shared_ptr<MalEnv> repl_env) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    if(args[0]->type != BOOL)
+        return std::shared_ptr<AstTokenBool> (new AstTokenBool(false));
+
+    std::shared_ptr<AstTokenBool> bool_ast;
+    bool_ast = as_type<AstTokenBool>(args[0]);
+
+    return std::shared_ptr<AstTokenBool> (new AstTokenBool(bool_ast->value));
+}
+
+std::shared_ptr<AstToken> nilqOperator(MalArgs args, MalArgs end, std::shared_ptr<MalEnv> repl_env) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    return std::shared_ptr<AstTokenBool> (new AstTokenBool(args[0]->type == NIL));
+}
+
+std::shared_ptr<AstToken> symbolOperator(MalArgs args, MalArgs end, std::shared_ptr<MalEnv> repl_env) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    std::shared_ptr<AstTokenString> str_ast;
+    str_ast = as_type<AstTokenString>(args[0]);
+
+    return std::shared_ptr<AstTokenSymbol> (new AstTokenSymbol(str_ast->value));
+}
+
 

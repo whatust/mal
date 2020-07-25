@@ -43,6 +43,7 @@ std::string pr_str(std::shared_ptr<AstToken> ast, bool print_readably){
     std::string ret = "";
 
     if(ast != nullptr) {
+        //std::cerr << ast->type << std::endl;
         switch(ast->type) {
 
             case SYMBOL: {
@@ -152,6 +153,7 @@ std::string pr_str(std::shared_ptr<AstToken> ast, bool print_readably){
                 std::shared_ptr<AstTokenOperator> op_ast;
                 op_ast = as_type<AstTokenOperator>(ast);
                 ret = op_ast->name;
+                break;
            }
            case EXCEPTION: {
                 std::shared_ptr<AstTokenException> excp_ast;
