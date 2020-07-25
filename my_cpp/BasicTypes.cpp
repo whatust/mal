@@ -17,6 +17,44 @@ AstTokenNumber::AstTokenNumber(int _number)
 AstTokenNumber::AstTokenNumber()
 : AstToken(NUMBER) {};
 
+AstTokenString::AstTokenString(std::string _value)
+: AstToken(STRING)
+, value(_value) {};
+
+AstTokenString::AstTokenString(std::string _value, bool clean)
+: AstToken(STRING) {
+
+    for(int i=1; i < (int) _value.length()-1; i++) {
+        if(_value[i] != '\\') {
+            value.push_back(_value[i]);
+        } else {
+            i++;
+            if(i < (int) _value.length()) {
+                switch (_value[i]) {
+
+                    case 'n':
+                        value.push_back('\n');
+                        break;
+                    case '"':
+                        value.push_back('"');
+                        break;
+                    case '\\':
+                        value.push_back('\\');
+                        break;
+                    default:
+                        value.push_back('\\');
+                        value.push_back(_value[i]);
+                }
+            }
+        }
+    }
+};
+
+AstTokenKeyword::AstTokenKeyword(std::string _value)
+: AstToken(KEYWORD) {
+    value = _value.replace(0, 1, "\xff");
+};
+
 AstTokenList::AstTokenList()
 : AstToken(LIST) {};
 
@@ -31,8 +69,13 @@ AstTokenList::AstTokenList(MalArgs init, MalArgs end)
 AstTokenVector::AstTokenVector()
 : AstToken(VECTOR) {};
 
-AstTokenHashMap::AstTokenHashMap()
-: AstToken(HASH_MAP) {};
+AstTokenVector::AstTokenVector(MalArgs init, MalArgs end)
+: AstToken(VECTOR) {
+    while(init != end) {
+        list.push_back(*init);
+        init++;
+    }
+};
 
 AstTokenBool::AstTokenBool(const std::string& _value)
 : AstToken(BOOL) {
@@ -42,4 +85,7 @@ AstTokenBool::AstTokenBool(const std::string& _value)
 AstTokenBool::AstTokenBool(bool _value)
 : AstToken(BOOL)
 , value(_value) {};
+
+AstTokenNil::AstTokenNil()
+: AstToken(NIL) {};
 

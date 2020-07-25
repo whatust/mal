@@ -32,21 +32,6 @@ class AstTokenFunction : public AstToken {
         ~AstTokenFunction();
 };
 
-class AstTokenString : public AstToken {
-    public:
-        const static tokenType ctype = STRING;
-        std::string value;
-        AstTokenString(std::string _value);
-        AstTokenString(std::string _value, bool clean);
-};
-
-class AstTokenKeyword : public AstToken {
-    public:
-        const static tokenType ctype = KEYWORD;
-        std::string value;
-        AstTokenKeyword(std::string _value);
-};
-
 class AstTokenAtom : public AstToken {
     public:
         const static tokenType ctype = ATOM;
@@ -54,17 +39,19 @@ class AstTokenAtom : public AstToken {
         AstTokenAtom(std::shared_ptr<AstToken> _object);
 };
 
-class AstTokenNil : public AstToken {
-    public:
-        const static tokenType ctype = NIL;
-        AstTokenNil();
-};
-
 class AstTokenException : public AstToken {
     public:
         std::shared_ptr<AstToken> ast;
         const static tokenType ctype = EXCEPTION;
         AstTokenException(std::shared_ptr<AstToken> _ast);
+};
+
+class AstTokenHashMap : public AstToken {
+    public:
+        const static tokenType ctype = HASH_MAP;
+        std::unordered_map<std::string, std::shared_ptr<AstToken>> map;
+        AstTokenHashMap();
+        AstTokenHashMap(MalArgs init, MalArgs end);
 };
 
 template <class T>

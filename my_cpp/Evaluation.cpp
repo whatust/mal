@@ -323,11 +323,14 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<Ma
             } else if(!list_ast->list.empty() && list_ast->list[0]->type == SYMBOL &&
                     as_type<AstTokenSymbol>(list_ast->list[0])->name == "try*") {
 
-                arg_assert(list_ast->list.size() == 3, ArgumentException(2, list_ast->list.size()-1));
+                arg_assert(list_ast->list.size() >= 2, ArgumentException(1, list_ast->list.size()-1));
 
                 try{
                     ret = eval(list_ast->list[1], repl_env);
                 } catch(std::shared_ptr<AstTokenException> e) {
+
+                    if(list_ast->list.size() < 3)
+                        throw e;
 
                     std::shared_ptr<AstTokenList> catch_list_ast;
                     catch_list_ast = as_type<AstTokenList>(list_ast->list[2]);
@@ -354,6 +357,11 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<Ma
                     }
 
                 } catch(std::exception& e) {
+
+                    if(list_ast->list.size() < 3) {
+                        std::cerr << e.what() << std::endl;
+                        throw EmptyInput();
+                    }
 
                     std::string error(e.what());
 

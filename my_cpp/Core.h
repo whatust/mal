@@ -69,5 +69,17 @@ std::shared_ptr<AstToken> nilqOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> symbolOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> keywordOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> keywordqOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> vectorOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> vectorqOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> sequentialOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> hashmapOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> mapqOperator(MalArgs args, MalArgs end);
+
+std::shared_ptr<AstToken> getOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> assocOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> dissocOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> containsqOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> keysOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> valsOperator(MalArgs args, MalArgs end);
 
 #endif //_CORE_H_

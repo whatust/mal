@@ -39,6 +39,21 @@ class AstTokenNumber : public AstToken {
         AstTokenNumber();
 };
 
+class AstTokenString : public AstToken {
+    public:
+        const static tokenType ctype = STRING;
+        std::string value;
+        AstTokenString(std::string _value);
+        AstTokenString(std::string _value, bool clean);
+};
+
+class AstTokenKeyword : public AstToken {
+    public:
+        const static tokenType ctype = KEYWORD;
+        std::string value;
+        AstTokenKeyword(std::string _value);
+};
+
 class AstTokenList : public AstToken {
     public:
         const static tokenType ctype = LIST;
@@ -52,13 +67,7 @@ class AstTokenVector : public AstToken {
         const static tokenType ctype = VECTOR;
         std::vector<std::shared_ptr<AstToken>> list;
         AstTokenVector();
-};
-
-class AstTokenHashMap : public AstToken {
-    public:
-        const static tokenType ctype = HASH_MAP;
-        std::unordered_map<std::string, std::shared_ptr<AstToken>> map;
-        AstTokenHashMap();
+        AstTokenVector(MalArgs init, MalArgs end);
 };
 
 class AstTokenBool : public AstToken {
@@ -67,6 +76,12 @@ class AstTokenBool : public AstToken {
         bool value;
         AstTokenBool(const std::string& _value);
         AstTokenBool(bool _value);
+};
+
+class AstTokenNil : public AstToken {
+    public:
+        const static tokenType ctype = NIL;
+        AstTokenNil();
 };
 
 #endif //BASIC_TYPES_H_

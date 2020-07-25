@@ -46,14 +46,26 @@ void start_outer_env(std::shared_ptr<MalEnv> repl_env) {
     repl_env->set("keyword", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("keyword", &keywordOperator)));
     repl_env->set("keyword?", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("keyword?", &keywordqOperator)));
 
+    repl_env->set("vector", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("vector", &vectorOperator)));
+    repl_env->set("vector?", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("vector?", &vectorqOperator)));
+    repl_env->set("sequential?", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("sequential?", &sequentialOperator)));
+    repl_env->set("hash-map", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("hash-map", &hashmapOperator)));
+    repl_env->set("map?", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("map?", mapqOperator)));
+
+    repl_env->set("get", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("get", getOperator)));
+    repl_env->set("assoc", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("assoc", assocOperator)));
+    repl_env->set("dissoc", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("dissoc", dissocOperator)));
+    repl_env->set("contains?", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("contains?", containsqOperator)));
+    repl_env->set("keys", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("keys", keysOperator)));
+    repl_env->set("vals", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("vals", valsOperator)));
+
     outer_env = repl_env;
     return;
 }
 
 std::shared_ptr<AstToken> addOperator(MalArgs args, MalArgs end) {
 
-    arg_assert(end - args == 2, ArgumentException(2, end - args));
-    int num_a = as_type<AstTokenNumber>(*args++)->value;
+    arg_assert(end - args == 2, ArgumentException(2, end - args)); int num_a = as_type<AstTokenNumber>(*args++)->value;
     int num_b = as_type<AstTokenNumber>(*args)->value;
 
     return std::shared_ptr<AstTokenNumber>(new AstTokenNumber(num_a + num_b));
@@ -142,10 +154,34 @@ bool equal(std::shared_ptr<AstToken> a, std::shared_ptr<AstToken> b) {
         auto it_b = std::begin(list_b->list);
 
         while(it_a != std::end(list_a->list) && it_b != std::end(list_b->list)) {
+
             if(!equal(*it_a, *it_b))
                 return false;
+
             it_a++;
             it_b++;
+        }
+        return true;
+    }else if(a->type == HASH_MAP && b->type == HASH_MAP) {
+
+        std::shared_ptr<AstTokenHashMap>hash_a;
+        std::shared_ptr<AstTokenHashMap>hash_b;
+
+        hash_a = as_type<AstTokenHashMap>(a);
+        hash_b = as_type<AstTokenHashMap>(b);
+
+        if(hash_a->map.size() != hash_b->map.size())
+            return false;
+
+        for(auto entry_a : hash_a->map) {
+
+            if(hash_b->map.find(entry_a.first) != std::end(hash_b->map)) {
+                if(!equal(entry_a.second, hash_b->map[entry_a.first])){
+                    return false;
+                }
+            } else {
+                return false;
+            }
         }
         return true;
     }else if(a->type != b->type) {
@@ -223,13 +259,26 @@ std::shared_ptr<AstToken> emptyOperator(MalArgs args, MalArgs end) {
 
 std::shared_ptr<AstToken> countOperator(MalArgs args, MalArgs end) {
 
+    int size = 0;
+
     if((*args)->type == NIL)
         return std::shared_ptr<AstTokenNumber>(new AstTokenNumber(0));
 
-    std::shared_ptr<AstTokenList> list_ast;
-    list_ast = as_type<AstTokenList>(*args);
+    if((*args)->type == LIST || (*args)->type == VECTOR) {
 
-    return std::shared_ptr<AstTokenNumber>(new AstTokenNumber(list_ast->list.size()));
+        std::shared_ptr<AstTokenList> list_ast;
+        list_ast = as_type<AstTokenList>(*args);
+        size = list_ast->list.size();
+    } else if((*args)->type == HASH_MAP) {
+
+        std::shared_ptr<AstTokenHashMap> hash_ast;
+        hash_ast = as_type<AstTokenHashMap>(*args);
+        size = hash_ast->map.size();
+    } else {
+        throw TokenException(LIST, (*args)->type);
+    }
+
+    return std::shared_ptr<AstTokenNumber>(new AstTokenNumber(size));
 }
 
 std::shared_ptr<AstToken> prnOperator(MalArgs args, MalArgs end) {
@@ -617,11 +666,20 @@ std::shared_ptr<AstToken> symbolOperator(MalArgs args, MalArgs end) {
 std::shared_ptr<AstToken> keywordOperator(MalArgs args, MalArgs end) {
 
     arg_assert(end - args == 1, ArgumentException(1, end - args));
+    std::string key;
 
-    std::shared_ptr<AstTokenString> std_ast;
-    std_ast = as_type<AstTokenString>(args[0]);
+    if(args[0]->type == STRING) {
+        std::shared_ptr<AstTokenString> str_ast;
+        str_ast = as_type<AstTokenString>(args[0]);
+        key = ":" + str_ast->value;
 
-    return std::shared_ptr<AstTokenKeyword> (new AstTokenKeyword(std_ast->value));
+    } else if(args[0]->type == KEYWORD) {
+        std::shared_ptr<AstTokenKeyword> key_ast;
+        key_ast = as_type<AstTokenKeyword>(args[0]);
+        key = key_ast->value;
+    }
+
+    return std::shared_ptr<AstTokenKeyword> (new AstTokenKeyword(key));
 }
 
 std::shared_ptr<AstToken> keywordqOperator(MalArgs args, MalArgs end) {
@@ -629,5 +687,180 @@ std::shared_ptr<AstToken> keywordqOperator(MalArgs args, MalArgs end) {
     arg_assert(end - args == 1, ArgumentException(1, end - args));
 
     return std::shared_ptr<AstTokenBool> (new AstTokenBool(args[0]->type == KEYWORD));
+}
+
+std::shared_ptr<AstToken> vectorOperator(MalArgs args, MalArgs end) {
+
+    return std::shared_ptr<AstTokenVector>(new AstTokenVector(args, end));
+
+}
+
+std::shared_ptr<AstToken> vectorqOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    return std::shared_ptr<AstTokenBool> (new AstTokenBool(args[0]->type == VECTOR));
+}
+
+
+std::shared_ptr<AstToken> sequentialOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    return std::shared_ptr<AstTokenBool> (new AstTokenBool(
+                            args[0]->type == VECTOR || args[0]->type == LIST));
+}
+
+std::shared_ptr<AstToken> hashmapOperator(MalArgs args, MalArgs end) {
+
+    map_assert((end - args) % 2 == 0,  MapException());
+
+    return std::shared_ptr<AstTokenHashMap> (new AstTokenHashMap(args, end));
+}
+
+std::shared_ptr<AstToken> mapqOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    return std::shared_ptr<AstTokenBool> (new AstTokenBool(args[0]->type == HASH_MAP));
+}
+
+std::shared_ptr<AstToken> getOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args == 2, ArgumentException(1, end - args));
+
+    if((*args)->type == NIL)
+        return *args;
+
+    std::string str;
+    std::shared_ptr<AstTokenHashMap> hash_ast;
+    hash_ast = as_type<AstTokenHashMap>(*args++);
+
+    if((*args)->type == STRING) {
+        str = as_type<AstTokenString>(*args)->value;
+    } else if((*args)->type == KEYWORD) {
+        str = as_type<AstTokenKeyword>(*args)->value;
+    }
+
+    if(hash_ast->map.find(str) == std::end(hash_ast->map)) {
+        return std::shared_ptr<AstTokenNil> (new AstTokenNil);
+    }
+
+    return hash_ast->map[str];
+
+}
+
+std::shared_ptr<AstToken> assocOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args >= 1, ArgumentException(1, end - args));
+
+    std::shared_ptr<AstTokenHashMap> hash_ast;
+    hash_ast = as_type<AstTokenHashMap>(*args++);
+
+    std::shared_ptr<AstTokenHashMap> new_hash_ast(new AstTokenHashMap);
+
+    for(auto entry : hash_ast->map) {
+        new_hash_ast->map[entry.first] = entry.second;
+    }
+
+    map_assert((end - args) % 2 == 0,  MapException());
+
+    while(args != end) {
+
+        std::string key;
+
+        if((*args)->type == STRING) {
+            key = as_type<AstTokenString>(*args++)->value;
+        }else if((*args)->type == KEYWORD) {
+            key = as_type<AstTokenKeyword>(*args++)->value;
+        }
+
+        new_hash_ast->map[key] = *args++;
+    }
+
+    return new_hash_ast;
+}
+
+std::shared_ptr<AstToken> dissocOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args >= 1, ArgumentException(1, end - args));
+
+    std::shared_ptr<AstTokenHashMap> hash_ast;
+    hash_ast = as_type<AstTokenHashMap> (*args++);
+
+    std::shared_ptr<AstTokenHashMap> new_hash_ast(new AstTokenHashMap);
+
+    for(auto entry : hash_ast->map) {
+        new_hash_ast->map[entry.first] = entry.second;
+    }
+
+    while(args != end) {
+
+        std::string key;
+
+        if((*args)->type == STRING) {
+            key = as_type<AstTokenString>(*args++)->value;
+        }else if((*args)->type == KEYWORD) {
+            key = as_type<AstTokenKeyword>(*args++)->value;
+        }
+
+        new_hash_ast->map.erase(key);
+    }
+    return new_hash_ast;
+}
+
+std::shared_ptr<AstToken> containsqOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args == 2, ArgumentException(2, end - args));
+
+    std::shared_ptr<AstTokenHashMap> hash_ast;
+    hash_ast = as_type<AstTokenHashMap> (*args++);
+
+    std::string key;
+
+    if((*args)->type == STRING) {
+        key = as_type<AstTokenString>(*args++)->value;
+    }else if((*args)->type == KEYWORD) {
+        key = as_type<AstTokenKeyword>(*args++)->value;
+    }
+
+    return std::shared_ptr<AstTokenBool> (new AstTokenBool(
+                    hash_ast->map.find(key) != std::end(hash_ast->map)));
+}
+
+std::shared_ptr<AstToken> keysOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    std::shared_ptr<AstTokenHashMap> hash_ast;
+    hash_ast = as_type<AstTokenHashMap> (args[0]);
+
+    std::shared_ptr<AstTokenList> list_ast(new AstTokenList);
+
+    for(auto const& entry : hash_ast->map) {
+
+        if(entry.first[0] == '\xff') {
+            list_ast->list.push_back(std::shared_ptr<AstTokenKeyword>(new AstTokenKeyword(entry.first.substr(1))));
+        } else {
+            list_ast->list.push_back(std::shared_ptr<AstTokenString>(new AstTokenString(entry.first)));
+        }
+    }
+    return list_ast;
+}
+
+std::shared_ptr<AstToken> valsOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    std::shared_ptr<AstTokenHashMap> hash_ast;
+    hash_ast = as_type<AstTokenHashMap> (args[0]);
+
+    std::shared_ptr<AstTokenList> list_ast(new AstTokenList);
+
+    for(auto& entry : hash_ast->map) {
+
+        list_ast->list.push_back(entry.second);
+    }
+    return list_ast;
 }
 
