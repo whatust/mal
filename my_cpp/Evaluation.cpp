@@ -395,7 +395,7 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<Ma
                     std::shared_ptr<AstTokenOperator> opToken;
 
                     opToken = as_type<AstTokenOperator>(eval(list_ast->list[0], env));
-                    ret = (*opToken)(++(std::cbegin(list_ast->list)), std::cend(list_ast->list),repl_env);
+                    ret = (*opToken)(++(std::cbegin(list_ast->list)), std::cend(list_ast->list));
                 } else if(list_ast->list[0]->type == FUNCTION) {
                     std::shared_ptr<AstTokenFunction> funToken;
 

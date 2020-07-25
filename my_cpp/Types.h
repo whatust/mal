@@ -8,7 +8,7 @@
 #include"BasicTypes.h"
 #include"Environment.h"
 
-typedef std::function<std::shared_ptr<AstToken>(MalArgs, MalArgs, std::shared_ptr<MalEnv>)> MalFunction;
+typedef std::function<std::shared_ptr<AstToken>(MalArgs, MalArgs)> MalFunction;
 
 class AstTokenOperator : public AstToken {
     public:
@@ -16,7 +16,7 @@ class AstTokenOperator : public AstToken {
         MalFunction op;
         std::string name;
         AstTokenOperator(std::string _name, MalFunction _op);
-        std::shared_ptr<AstToken> operator()(MalArgs args, MalArgs end, std::shared_ptr<MalEnv> repl_env);
+        std::shared_ptr<AstToken> operator()(MalArgs args, MalArgs end);
 };
 
 class AstTokenFunction : public AstToken {

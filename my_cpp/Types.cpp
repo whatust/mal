@@ -5,8 +5,8 @@ AstTokenOperator::AstTokenOperator(std::string _name, MalFunction _op)
 , op(_op)
 , name(_name){};
 
-std::shared_ptr<AstToken> AstTokenOperator::operator()(MalArgs args, MalArgs end, std::shared_ptr<MalEnv> repl_env) {
-    return op(args, end, repl_env);
+std::shared_ptr<AstToken> AstTokenOperator::operator()(MalArgs args, MalArgs end) {
+    return op(args, end);
 };
 
 AstTokenFunction::AstTokenFunction(std::shared_ptr<MalEnv> _scope, std::shared_ptr<AstToken>_params,
