@@ -20,7 +20,7 @@ TARGETS=$(MAINS:%.cpp=%)
 .SUFFIXES: .cpp .o
 
 all: $(TARGETS)
-	mv step9_try run
+	mv stepa_mal run
 
 dist: mal
 

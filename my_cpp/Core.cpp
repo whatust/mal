@@ -59,6 +59,8 @@ void start_outer_env(std::shared_ptr<MalEnv> repl_env) {
     repl_env->set("keys", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("keys", keysOperator)));
     repl_env->set("vals", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("vals", valsOperator)));
 
+    repl_env->set("readline", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("readline", readlineOperator)));
+
     outer_env = repl_env;
     return;
 }
@@ -862,5 +864,22 @@ std::shared_ptr<AstToken> valsOperator(MalArgs args, MalArgs end) {
         list_ast->list.push_back(entry.second);
     }
     return list_ast;
+}
+
+std::shared_ptr<AstToken> readlineOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    std::shared_ptr<AstTokenString> str_ast;
+    str_ast = as_type<AstTokenString> (args[0]);
+
+    std::string input;
+
+    std::cout << str_ast->value;
+    std::cin >> input;
+
+    std::shared_ptr<AstTokenString> input_ast(new AstTokenString(input));
+
+    return input_ast;
 }
 
