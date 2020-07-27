@@ -35,13 +35,14 @@ AstTokenFunction::AstTokenFunction(std::shared_ptr<MalEnv> _scope, std::shared_p
             params.push_back(symbol->name);
         }
     }
-
+    //std::cout << "SCOPE" << std::endl;
+    //scope->print();
 };
 
 AstTokenFunction::~AstTokenFunction() {
 };
 
-AstTokenAtom::AstTokenAtom(std::shared_ptr<AstToken> _object) 
+AstTokenAtom::AstTokenAtom(std::shared_ptr<AstToken> _object)
 : AstToken(ATOM) {
     object = _object;
 }

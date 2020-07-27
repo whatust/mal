@@ -1,6 +1,7 @@
 #include"Core.h"
 
 void start_outer_env(std::shared_ptr<MalEnv> repl_env) {
+    repl_env->set("*host-language*", std::shared_ptr<AstTokenString>(new AstTokenString("Cpp")));
 
     repl_env->set("+", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("+", &addOperator)));
     repl_env->set("-", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("-", &subOperator)));
@@ -424,16 +425,45 @@ std::shared_ptr<AstToken> swapOperator(MalArgs args, MalArgs end) {
     list_ast = std::shared_ptr<AstTokenList>(new AstTokenList);
 
     std::shared_ptr<AstTokenAtom> atom_ast;
-    atom_ast = as_type<AstTokenAtom>(args[0]);
+    atom_ast = as_type<AstTokenAtom>(*args++);
 
-    list_ast->list.push_back(args[1]);
-    list_ast->list.push_back(atom_ast->object);
+    std::shared_ptr<AstToken> ret;
+    std::shared_ptr<AstToken> holder_ast = *args++;
 
-    for(args = args + 2; args != end; args++){
-        list_ast->list.push_back(*args);
+    std::vector<std::shared_ptr<AstToken>> params;
+    params.push_back(atom_ast->object);
+
+    while(args != end) params.push_back(*args++);
+
+    if(holder_ast->type == FUNCTION) {
+        std::shared_ptr<AstTokenFunction> fun_ast;
+        fun_ast = as_type<AstTokenFunction> (holder_ast);
+
+        //std::cout << "FUN1" << std::endl;
+        //fun_ast->scope->print();
+
+        std::shared_ptr<MalEnv>repl_env(new MalEnv(fun_ast->scope));
+        repl_env->set_bindings(fun_ast->params, fun_ast->larg, std::cbegin(params), std::cend(params));
+
+        ret = eval(fun_ast->function, repl_env);
+
+        //std::cout << "FUN2" << std::endl;
+        //fun_ast->scope->print();
+        //std::cout << "ENV" << std::endl;
+        //repl_env->print();
+
+    } else if(holder_ast->type == OPERATOR) {
+        std::shared_ptr<AstTokenOperator> op_ast;
+        op_ast = as_type<AstTokenOperator> (holder_ast);
+
+        ret = (*op_ast)(std::cbegin(params), std::cend(params));
+
+    } else {
+        throw TokenException(FUNCTION, holder_ast->type);
     }
 
-    atom_ast->object = eval(list_ast, outer_env);
+    // eval function
+    atom_ast->object = ret;
 
     return atom_ast->object;
 }
@@ -877,6 +907,11 @@ std::shared_ptr<AstToken> readlineOperator(MalArgs args, MalArgs end) {
 
     std::cout << str_ast->value;
     std::cin >> input;
+
+    if(input.empty()) {
+        std::cout << std::endl;
+        return std::shared_ptr<AstTokenNil>(new AstTokenNil);
+    }
 
     std::shared_ptr<AstTokenString> input_ast(new AstTokenString(input));
 
