@@ -15,6 +15,7 @@ enum tokenType { SYMBOL, NUMBER, LIST, VECTOR,
 class AstToken {
     public:
         tokenType type;
+        std::shared_ptr<AstToken> meta;
         AstToken(tokenType _type);
 };
 

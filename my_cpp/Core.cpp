@@ -62,6 +62,9 @@ void start_outer_env(std::shared_ptr<MalEnv> repl_env) {
 
     repl_env->set("readline", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("readline", readlineOperator)));
 
+    repl_env->set("meta", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("meta", metaOperator)));
+    repl_env->set("with-meta", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("with-meta", withmetaOperator)));
+
     outer_env = repl_env;
     return;
 }
@@ -357,6 +360,8 @@ std::shared_ptr<AstToken> printlnOperator(MalArgs args, MalArgs end) {
 
 std::shared_ptr<AstToken> readstrOperator(MalArgs args, MalArgs end) {
 
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
     std::string str = as_type<AstTokenString>(*args)->value;
 
     return read_str(str);
@@ -439,18 +444,10 @@ std::shared_ptr<AstToken> swapOperator(MalArgs args, MalArgs end) {
         std::shared_ptr<AstTokenFunction> fun_ast;
         fun_ast = as_type<AstTokenFunction> (holder_ast);
 
-        //std::cout << "FUN1" << std::endl;
-        //fun_ast->scope->print();
-
         std::shared_ptr<MalEnv>repl_env(new MalEnv(fun_ast->scope));
         repl_env->set_bindings(fun_ast->params, fun_ast->larg, std::cbegin(params), std::cend(params));
 
         ret = eval(fun_ast->function, repl_env);
-
-        //std::cout << "FUN2" << std::endl;
-        //fun_ast->scope->print();
-        //std::cout << "ENV" << std::endl;
-        //repl_env->print();
 
     } else if(holder_ast->type == OPERATOR) {
         std::shared_ptr<AstTokenOperator> op_ast;
@@ -906,7 +903,7 @@ std::shared_ptr<AstToken> readlineOperator(MalArgs args, MalArgs end) {
     std::string input;
 
     std::cout << str_ast->value;
-    std::cin >> input;
+    std::getline(std::cin, input);
 
     if(input.empty()) {
         std::cout << std::endl;
@@ -916,5 +913,141 @@ std::shared_ptr<AstToken> readlineOperator(MalArgs args, MalArgs end) {
     std::shared_ptr<AstTokenString> input_ast(new AstTokenString(input));
 
     return input_ast;
+}
+
+std::shared_ptr<AstToken> metaOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end -  args == 1, ArgumentException(1, end - args));
+
+    /*
+    std::shared_ptr<AstToken> meta;
+
+    switch (args[0]->type) {
+        case OPERATOR: {
+            std::shared_ptr<AstTokenOperator> op_ast;
+            op_ast = as_type<AstTokenOperator>(args[0]);
+            meta = op_ast->meta;
+            break; }
+        case FUNCTION: {
+            std::shared_ptr<AstTokenFunction> fun_ast;
+            fun_ast = as_type<AstTokenFunction>(args[0]);
+            meta = fun_ast->meta;
+            break; }
+        case LIST: {
+            std::shared_ptr<AstTokenList> list_ast;
+            list_ast = as_type<AstTokenList>(args[0]);
+            meta = list_ast->meta;
+            break; }
+        case VECTOR: {
+            std::shared_ptr<AstTokenVector> vec_ast;
+            vec_ast = as_type<AstTokenVector>(args[0]);
+            meta = vec_ast->meta;
+            break; }
+        case HASH_MAP: {
+            std::shared_ptr<AstTokenHashMap> hash_ast;
+            hash_ast = as_type<AstTokenHashMap>(args[0]);
+            meta = hash_ast->meta;
+            break; }
+        case ATOM: {
+            std::shared_ptr<AstTokenAtom> atom_ast;
+            atom_ast = as_type<AstTokenAtom>(args[0]);
+            meta = atom_ast->meta;
+            break; }
+        default:
+            throw TokenException(LIST, args[0]->type);
+    }*/
+
+    return args[0]->meta;
+}
+
+std::shared_ptr<AstToken> withmetaOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end -  args == 2, ArgumentException(2, end - args));
+
+    std::shared_ptr<AstToken> holder_ast;
+    holder_ast = *args++;
+
+    std::shared_ptr<AstToken> meta_ast;
+    meta_ast = *args;
+
+    std::shared_ptr<AstToken> ret;
+
+    switch(holder_ast->type) {
+        case OPERATOR: {
+           std::shared_ptr<AstTokenOperator> op_ast;
+           op_ast = as_type<AstTokenOperator>(holder_ast);
+
+           std::shared_ptr<AstTokenOperator> new_op_ast(new AstTokenOperator);
+
+           new_op_ast->meta = meta_ast;
+           new_op_ast->op = op_ast->op;
+           new_op_ast->name = op_ast->name;
+
+           ret =  new_op_ast;
+           break; }
+        case FUNCTION: {
+           std::shared_ptr<AstTokenFunction> fun_ast;
+           fun_ast = as_type<AstTokenFunction>(holder_ast);
+
+           std::shared_ptr<AstTokenFunction> new_fun_ast(new AstTokenFunction);
+
+           new_fun_ast->meta = meta_ast;
+           new_fun_ast->scope= fun_ast->scope;
+           new_fun_ast->larg = fun_ast->larg;
+           new_fun_ast->function = fun_ast->function;
+           new_fun_ast->is_macro = fun_ast->is_macro;
+
+           std::copy(std::cbegin(fun_ast->params), std::cend(fun_ast->params),
+                                   std::back_inserter(new_fun_ast->params));
+
+           ret =  new_fun_ast;
+           break; }
+        case LIST: {
+            std::shared_ptr<AstTokenList> list_ast;
+            list_ast = as_type<AstTokenList> (holder_ast);
+
+            std::shared_ptr<AstTokenList> new_list_ast;
+            new_list_ast = std::shared_ptr<AstTokenList>(new AstTokenList(
+                    std::cbegin(list_ast->list), std::cend(list_ast->list)));
+
+            new_list_ast->meta = meta_ast;
+            ret = new_list_ast;
+            break; }
+        case VECTOR: {
+            std::shared_ptr<AstTokenVector> vec_ast;
+            vec_ast = as_type<AstTokenVector> (holder_ast);
+
+            std::shared_ptr<AstTokenVector> new_vec_ast;
+            new_vec_ast = std::shared_ptr<AstTokenVector>(new AstTokenVector(
+                    std::cbegin(vec_ast->list), std::cend(vec_ast->list)));
+
+            new_vec_ast->meta = meta_ast;
+            ret = new_vec_ast;
+            break; }
+        case HASH_MAP: {
+            std::shared_ptr<AstTokenHashMap> hash_ast;
+            hash_ast = as_type<AstTokenHashMap> (holder_ast);
+
+            std::shared_ptr<AstTokenHashMap> new_hash_ast(new AstTokenHashMap);
+
+            new_hash_ast->meta = meta_ast;
+            new_hash_ast->map = hash_ast->map;
+            ret = new_hash_ast;
+            break; }
+        case ATOM: {
+            std::shared_ptr<AstTokenAtom> atom_ast;
+            atom_ast = as_type<AstTokenAtom> (holder_ast);
+
+            std::shared_ptr<AstTokenAtom> new_atom_ast(new AstTokenAtom);
+
+            new_atom_ast->meta = meta_ast;
+            new_atom_ast->object = atom_ast->object;
+            ret = new_atom_ast;
+            break; }
+        default:
+            throw TokenException(LIST, holder_ast->type);
+    }
+
+    return ret;
 }
 

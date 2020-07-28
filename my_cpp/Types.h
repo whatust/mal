@@ -15,6 +15,7 @@ class AstTokenOperator : public AstToken {
         const static tokenType ctype = OPERATOR;
         MalFunction op;
         std::string name;
+        AstTokenOperator();
         AstTokenOperator(std::string _name, MalFunction _op);
         std::shared_ptr<AstToken> operator()(MalArgs args, MalArgs end);
 };
@@ -27,6 +28,7 @@ class AstTokenFunction : public AstToken {
         std::vector<std::string> params;
         std::shared_ptr<AstToken> function;
         bool is_macro;
+        AstTokenFunction();
         AstTokenFunction(std::shared_ptr<MalEnv> _scope, std::shared_ptr<AstToken> _params,
                                     std::shared_ptr<AstToken> _function, bool _macro);
         ~AstTokenFunction();
@@ -37,6 +39,7 @@ class AstTokenAtom : public AstToken {
         const static tokenType ctype = ATOM;
         std::shared_ptr<AstToken> object;
         AstTokenAtom(std::shared_ptr<AstToken> _object);
+        AstTokenAtom();
 };
 
 class AstTokenException : public AstToken {

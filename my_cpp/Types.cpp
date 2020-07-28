@@ -1,17 +1,25 @@
 #include"Types.h"
 
+AstTokenOperator::AstTokenOperator() : AstToken(OPERATOR) {
+    AstToken::meta = std::shared_ptr<AstTokenNil>(new AstTokenNil);
+};
+
 AstTokenOperator::AstTokenOperator(std::string _name, MalFunction _op)
 : AstToken(OPERATOR)
-, op(_op)
-, name(_name){};
+, op(_op) , name(_name) {
+    AstToken::meta = std::shared_ptr<AstTokenNil>(new AstTokenNil);
+};
 
 std::shared_ptr<AstToken> AstTokenOperator::operator()(MalArgs args, MalArgs end) {
     return op(args, end);
 };
 
+AstTokenFunction::AstTokenFunction() : AstToken(FUNCTION) {};
 AstTokenFunction::AstTokenFunction(std::shared_ptr<MalEnv> _scope, std::shared_ptr<AstToken>_params,
                                             std::shared_ptr<AstToken> _function, bool _macro)
 : AstToken(FUNCTION) , function(_function) , is_macro(_macro) {
+
+    AstToken::meta = std::shared_ptr<AstTokenNil>(new AstTokenNil);
 
     scope = _scope;
 
@@ -39,19 +47,27 @@ AstTokenFunction::AstTokenFunction(std::shared_ptr<MalEnv> _scope, std::shared_p
     //scope->print();
 };
 
-AstTokenFunction::~AstTokenFunction() {
-};
+AstTokenFunction::~AstTokenFunction() {};
+
+AstTokenAtom::AstTokenAtom() : AstToken(ATOM) {};
 
 AstTokenAtom::AstTokenAtom(std::shared_ptr<AstToken> _object)
 : AstToken(ATOM) {
+
+    AstToken::meta = std::shared_ptr<AstTokenNil>(new AstTokenNil);
+
     object = _object;
 }
 
 AstTokenHashMap::AstTokenHashMap()
-: AstToken(HASH_MAP) {};
+: AstToken(HASH_MAP) {
+    AstToken::meta = std::shared_ptr<AstTokenNil>(new AstTokenNil);
+};
 
 AstTokenHashMap::AstTokenHashMap(MalArgs init, MalArgs end)
 : AstToken(HASH_MAP) {
+
+    AstToken::meta = std::shared_ptr<AstTokenNil>(new AstTokenNil);
 
     while(init != end) {
 
@@ -68,5 +84,10 @@ AstTokenHashMap::AstTokenHashMap(MalArgs init, MalArgs end)
 };
 
 AstTokenException::AstTokenException(std::shared_ptr<AstToken> _ast)
-: AstToken(EXCEPTION) { ast = _ast; };
+: AstToken(EXCEPTION) { 
+
+    AstToken::meta = std::shared_ptr<AstTokenNil>(new AstTokenNil);
+
+    ast = _ast;
+};
 

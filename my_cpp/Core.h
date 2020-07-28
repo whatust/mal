@@ -83,5 +83,7 @@ std::shared_ptr<AstToken> keysOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> valsOperator(MalArgs args, MalArgs end);
 
 std::shared_ptr<AstToken> readlineOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> metaOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> withmetaOperator(MalArgs args, MalArgs end);
 
 #endif //_CORE_H_
