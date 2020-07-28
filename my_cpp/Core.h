@@ -90,4 +90,10 @@ std::shared_ptr<AstToken> withmetaOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> timeOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> conjOperator(MalArgs args, MalArgs end);
 
+std::shared_ptr<AstToken> stringqOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> numberqOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> fnqOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> macroqOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> seqOperator(MalArgs args, MalArgs end);
+
 #endif //_CORE_H_

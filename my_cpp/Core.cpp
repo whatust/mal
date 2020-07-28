@@ -67,6 +67,12 @@ void start_outer_env(std::shared_ptr<MalEnv> repl_env) {
     repl_env->set("time-ms", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("time-ms", timeOperator)));
     repl_env->set("conj", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("conj", conjOperator)));
 
+    repl_env->set("string?", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("string?", stringqOperator)));
+    repl_env->set("number?", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("number?", numberqOperator)));
+    repl_env->set("fn?", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("fn?", fnqOperator)));
+    repl_env->set("macro?", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("macro?", macroqOperator)));
+    repl_env->set("seq", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("seq", seqOperator)));
+
     outer_env = repl_env;
     return;
 }
@@ -994,7 +1000,7 @@ std::shared_ptr<AstToken> withmetaOperator(MalArgs args, MalArgs end) {
            std::shared_ptr<AstTokenFunction> new_fun_ast(new AstTokenFunction);
 
            new_fun_ast->meta = meta_ast;
-           new_fun_ast->scope= fun_ast->scope;
+           new_fun_ast->scope = fun_ast->scope;
            new_fun_ast->larg = fun_ast->larg;
            new_fun_ast->function = fun_ast->function;
            new_fun_ast->is_macro = fun_ast->is_macro;
@@ -1107,4 +1113,115 @@ std::shared_ptr<AstToken> conjOperator(MalArgs args, MalArgs end) {
     return ret;
 }
 
+std::shared_ptr<AstToken> stringqOperator(MalArgs args, MalArgs end) {
 
+    arg_assert(end -  args == 1, ArgumentException(1, end - args));
+
+    return std::shared_ptr<AstTokenBool>(new AstTokenBool(args[0]->type == STRING));
+}
+
+std::shared_ptr<AstToken> numberqOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end -  args == 1, ArgumentException(1, end - args));
+
+    return std::shared_ptr<AstTokenBool>(new AstTokenBool(args[0]->type == NUMBER));
+}
+
+std::shared_ptr<AstToken> fnqOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end -  args == 1, ArgumentException(1, end - args));
+
+    bool is_fun;
+    std::shared_ptr<AstTokenBool> ret;
+
+    if(args[0]->type == OPERATOR) {
+        is_fun = true;
+
+    } else if (args[0]->type == FUNCTION) {
+        std::shared_ptr<AstTokenFunction> fun_ast;
+        fun_ast = as_type<AstTokenFunction>(args[0]);
+
+        is_fun = !fun_ast->is_macro; 
+    } else {
+        is_fun =  false;
+    }
+
+    return std::shared_ptr<AstTokenBool>(new AstTokenBool(is_fun));
+}
+
+std::shared_ptr<AstToken> macroqOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    bool is_macro;
+
+    if(args[0]->type == FUNCTION) {
+
+        std::shared_ptr<AstTokenFunction> fun_ast;
+        fun_ast = as_type<AstTokenFunction>(args[0]);
+
+        is_macro = fun_ast->is_macro;
+    } else {
+        is_macro = false;
+    }
+
+    return std::shared_ptr<AstTokenBool>(new AstTokenBool(is_macro));
+}
+
+std::shared_ptr<AstToken> seqOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end - args == 1, ArgumentException(1, end - args));
+
+    std::shared_ptr<AstToken> ret;
+
+    switch(args[0]->type) {
+        case LIST: {
+            std::shared_ptr<AstTokenList> list_ast;
+            list_ast = as_type<AstTokenList>(args[0]);
+
+            if(list_ast->list.empty()) {
+                ret = std::shared_ptr<AstTokenNil>(new AstTokenNil);
+            } else {
+                ret = args[0];
+            }
+            break;
+        }
+        case VECTOR: {
+            std::shared_ptr<AstTokenVector> vec_ast;
+            vec_ast = as_type<AstTokenVector>(args[0]);
+
+            if(vec_ast->list.empty()) {
+                ret = std::shared_ptr<AstTokenNil>(new AstTokenNil);
+            } else {
+                vec_ast->type = LIST;
+                ret = vec_ast;
+            }
+            break;
+        }
+        case STRING: {
+            std::shared_ptr<AstTokenString> str_ast;
+            str_ast = as_type<AstTokenString>(args[0]);
+
+            std::shared_ptr<AstTokenList> list_ast(new AstTokenList);
+
+            if(str_ast->value.empty()) {
+                ret = std::shared_ptr<AstTokenNil>(new AstTokenNil);
+            } else {
+                for(auto c : str_ast->value){
+                    list_ast->list.push_back(std::shared_ptr<AstTokenString>(
+                                    new AstTokenString(std::string(1, c))));
+                }
+                ret = list_ast;
+            }
+            break;
+        }
+        case NIL: {
+            ret = std::shared_ptr<AstTokenNil>(new AstTokenNil);
+            break;
+        }
+        default:
+            throw TokenException(LIST, args[0]->type);
+    }
+
+    return ret;
+}

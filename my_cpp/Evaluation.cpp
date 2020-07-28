@@ -304,9 +304,21 @@ std::shared_ptr<AstToken> eval(std::shared_ptr<AstToken> ast, std::shared_ptr<Ma
                 std::shared_ptr<AstToken> value = eval(list_ast->list[2], env);
 
                 if(value->type == FUNCTION) {
-                    std::shared_ptr<AstTokenFunction> fun_ast = as_type<AstTokenFunction>(value);
-                    fun_ast->is_macro = true;
-                    env->set(key_token, value);
+
+                    std::shared_ptr<AstTokenFunction> fun_ast;
+                    fun_ast = as_type<AstTokenFunction>(value);
+
+                    std::shared_ptr<AstTokenFunction> macro_ast(new AstTokenFunction);
+
+                    macro_ast->scope = fun_ast->scope;
+                    macro_ast->larg = fun_ast->larg;
+                    macro_ast->function = fun_ast->function;
+                    macro_ast->is_macro = true;
+
+                   std::copy(std::cbegin(fun_ast->params), std::cend(fun_ast->params),
+                                   std::back_inserter(macro_ast->params));
+
+                    env->set(key_token, macro_ast);
                 } else {
                     throw MacroException(value->type);
                 }
