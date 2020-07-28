@@ -64,6 +64,8 @@ void start_outer_env(std::shared_ptr<MalEnv> repl_env) {
 
     repl_env->set("meta", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("meta", metaOperator)));
     repl_env->set("with-meta", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("with-meta", withmetaOperator)));
+    repl_env->set("time-ms", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("time-ms", timeOperator)));
+    repl_env->set("conj", std::shared_ptr<AstTokenOperator>(new AstTokenOperator("conj", conjOperator)));
 
     outer_env = repl_env;
     return;
@@ -1050,4 +1052,59 @@ std::shared_ptr<AstToken> withmetaOperator(MalArgs args, MalArgs end) {
 
     return ret;
 }
+
+std::shared_ptr<AstToken> timeOperator(MalArgs args, MalArgs end) {
+
+    std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                                    std::chrono::system_clock::now().time_since_epoch());
+
+    return std::shared_ptr<AstTokenNumber>(new AstTokenNumber((int) ms.count()));
+}
+
+std::shared_ptr<AstToken> conjOperator(MalArgs args, MalArgs end) {
+
+    arg_assert(end -  args >= 1, ArgumentException(1, end - args));
+
+    std::shared_ptr<AstToken> ret;
+
+    if(args[0]->type == LIST) {
+
+        std::shared_ptr<AstTokenList> list_ast;
+        list_ast = as_type<AstTokenList>(*args);
+
+        std::shared_ptr<AstTokenList> new_list_ast(new AstTokenList);
+
+        end--;
+        while(args != end) {
+            new_list_ast->list.push_back(*end--);
+        }
+
+        for(auto token : list_ast->list) {
+            new_list_ast->list.push_back(token);
+        }
+        ret = new_list_ast;
+
+    } else if(args[0]->type == VECTOR) {
+
+        std::shared_ptr<AstTokenVector> vec_ast;
+        vec_ast = as_type<AstTokenVector>(*args++);
+
+        std::shared_ptr<AstTokenVector> new_vec_ast(new AstTokenVector);
+
+        for(auto token : vec_ast->list) {
+            new_vec_ast->list.push_back(token);
+        }
+
+        while(args != end) {
+            new_vec_ast->list.push_back(*args++);
+        }
+        ret = new_vec_ast;
+
+    }else {
+        throw TokenException(LIST, args[0]->type);
+    }
+
+    return ret;
+}
+
 

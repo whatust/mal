@@ -2,6 +2,7 @@
 #define _CORE_H_
 
 #include<algorithm>
+#include<chrono>
 #include<fstream>
 #include<iostream>
 #include<iterator>
@@ -85,5 +86,8 @@ std::shared_ptr<AstToken> valsOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> readlineOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> metaOperator(MalArgs args, MalArgs end);
 std::shared_ptr<AstToken> withmetaOperator(MalArgs args, MalArgs end);
+
+std::shared_ptr<AstToken> timeOperator(MalArgs args, MalArgs end);
+std::shared_ptr<AstToken> conjOperator(MalArgs args, MalArgs end);
 
 #endif //_CORE_H_
