@@ -927,44 +927,6 @@ std::shared_ptr<AstToken> metaOperator(MalArgs args, MalArgs end) {
 
     arg_assert(end -  args == 1, ArgumentException(1, end - args));
 
-    /*
-    std::shared_ptr<AstToken> meta;
-
-    switch (args[0]->type) {
-        case OPERATOR: {
-            std::shared_ptr<AstTokenOperator> op_ast;
-            op_ast = as_type<AstTokenOperator>(args[0]);
-            meta = op_ast->meta;
-            break; }
-        case FUNCTION: {
-            std::shared_ptr<AstTokenFunction> fun_ast;
-            fun_ast = as_type<AstTokenFunction>(args[0]);
-            meta = fun_ast->meta;
-            break; }
-        case LIST: {
-            std::shared_ptr<AstTokenList> list_ast;
-            list_ast = as_type<AstTokenList>(args[0]);
-            meta = list_ast->meta;
-            break; }
-        case VECTOR: {
-            std::shared_ptr<AstTokenVector> vec_ast;
-            vec_ast = as_type<AstTokenVector>(args[0]);
-            meta = vec_ast->meta;
-            break; }
-        case HASH_MAP: {
-            std::shared_ptr<AstTokenHashMap> hash_ast;
-            hash_ast = as_type<AstTokenHashMap>(args[0]);
-            meta = hash_ast->meta;
-            break; }
-        case ATOM: {
-            std::shared_ptr<AstTokenAtom> atom_ast;
-            atom_ast = as_type<AstTokenAtom>(args[0]);
-            meta = atom_ast->meta;
-            break; }
-        default:
-            throw TokenException(LIST, args[0]->type);
-    }*/
-
     return args[0]->meta;
 }
 
@@ -1141,7 +1103,7 @@ std::shared_ptr<AstToken> fnqOperator(MalArgs args, MalArgs end) {
         std::shared_ptr<AstTokenFunction> fun_ast;
         fun_ast = as_type<AstTokenFunction>(args[0]);
 
-        is_fun = !fun_ast->is_macro; 
+        is_fun = !fun_ast->is_macro;
     } else {
         is_fun =  false;
     }
