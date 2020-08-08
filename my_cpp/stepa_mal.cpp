@@ -2,9 +2,8 @@
 #include<string>
 #include"ReadLine.h"
 #include"Reader.h"
-#include"Types.h"
+#include"BasicTypes.h"
 #include"Printer.h"
-#include"Validation.h"
 #include"Evaluation.h"
 #include"Core.h"
 
