@@ -12,7 +12,10 @@ TokenException::what() const noexcept {
 
     char* error = (char*)malloc(strlen(_error) + strlen(token_to_str[got]) +
                                         strlen(token_to_str[expected] + 1));
-    sprintf(error, _error, token_to_str[got], token_to_str[expected]);
+
+    if(error)
+        sprintf(error, _error, token_to_str[got], token_to_str[expected]);
+
 return error;
 }
 
@@ -22,7 +25,9 @@ ArgumentException::what() const noexcept {
     const char* _error = "Error: Wrong number of arguments got %i arguments expected: %i";
 
     char* error = (char*)malloc(strlen(_error) + 11 + 11 + 1);
-    sprintf(error, _error, got, expected);
+
+    if(error)
+        sprintf(error, _error, got, expected);
 
     return error;
 }
@@ -41,7 +46,9 @@ SymException::what() const noexcept {
     const char* _error = "'%s' not found";
 
     char* error = (char*)malloc(strlen(_error) + symbol.length() + 1);
-    sprintf(error, _error, symbol.c_str());
+
+    if(error)
+        sprintf(error, _error, symbol.c_str());
 
     return error;
 }
@@ -52,7 +59,9 @@ BalException::what() const noexcept {
     const char* _error = "Error: Expected %s got EOF";
 
     char* error = (char*)malloc(strlen(_error) + expected.length() + 1);
-    sprintf(error, _error, expected.c_str());
+
+    if(error)
+        sprintf(error, _error, expected.c_str());
 
     return error;
 }
@@ -64,7 +73,9 @@ UncException::what() const noexcept {
 
     char* error = (char*)malloc(strlen(_error) + strlen(token_to_str[a]) +
                                             strlen(token_to_str[b]) + 1);
-    sprintf(error, _error, token_to_str[a], token_to_str[b]);
+
+    if(error)
+        sprintf(error, _error, token_to_str[a], token_to_str[b]);
 
     return error;
 };
@@ -75,7 +86,9 @@ MacroException::what() const noexcept {
     const char* _error = "Error: Macro erro expected type FUNCTION got %s";
 
     char* error = (char*)malloc(strlen(_error) + strlen(token_to_str[expected]) + 1);
-    sprintf(error, _error, token_to_str[expected]);
+
+    if(error)
+        sprintf(error, _error, token_to_str[expected]);
 
     return error;
 };
@@ -86,7 +99,9 @@ OutRangeException::what() const noexcept {
     const char* _error = "Error: Out of range index %i out of range (list size %i)";
 
     char* error = (char*)malloc(strlen(_error) + 11 + 11 + 1);
-    sprintf(error, _error, index, size);
+
+    if(error)
+        sprintf(error, _error, index, size);
 
     return error;
 }
